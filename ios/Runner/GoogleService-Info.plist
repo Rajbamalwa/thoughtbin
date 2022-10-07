@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>945181315989-eno3fig4m8g18cbvd4qu9sp0qmju4bjc.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.945181315989-eno3fig4m8g18cbvd4qu9sp0qmju4bjc</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>945181315989-2h6b1c2k8d09fh54v3ga7dkig0qs55tj.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCB2Gyk_qeZmLXhR8HbqmU1q3zjKfa3SDI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>945181315989</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.thoughtbin</string>
+	<key>PROJECT_ID</key>
+	<string>thoughtbin-73a7e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>thoughtbin-73a7e.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:945181315989:ios:6e1a2b99f6eed66e045c9c</string>
+	<key>DATABASE_URL</key>
+	<string>https://thoughtbin-73a7e-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>
