@@ -119,13 +119,13 @@ GestureDetector draft_post(Function() onPress, String text) {
 class MyButtonList extends StatefulWidget {
   MyButtonList(
       {Key? key,
-      required this.buttons,
+      required this.buttons1,
       required this.height,
       required this.width})
       : super(key: key);
   late double height, width;
 
-  final List<ButtonData> buttons;
+  final List<ButtonData> buttons1;
 
   @override
   State<MyButtonList> createState() => _MyButtonListState();
@@ -137,7 +137,7 @@ class _MyButtonListState extends State<MyButtonList> {
   @override
   void initState() {
     favoriateState = List.generate(
-        widget.buttons.length, (index) => widget.buttons[index].isFavorite);
+        widget.buttons1.length, (index) => widget.buttons1[index].isFavorite);
     super.initState();
   }
 
@@ -146,23 +146,25 @@ class _MyButtonListState extends State<MyButtonList> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        for (var i = 0; i < widget.buttons.length; i++)
-          MyWidget2(
-            text: widget.buttons[i].text,
-            onPressed: () {
-              for (var j = 0; j < favoriateState.length; j++) {
-                favoriateState[j] = false;
-              }
-              setState(() {
-                favoriateState[i] = true;
-                if (widget.buttons[i].onPressed != null) {
-                  widget.buttons[i].onPressed!();
+        for (var i = 0; i < widget.buttons1.length; i++)
+          Center(
+            child: MyWidget(
+              text: widget.buttons1[i].text,
+              onPressed: () {
+                for (var j = 0; j < favoriateState.length; j++) {
+                  favoriateState[j] = false;
                 }
-              });
-            },
-            isFavourte: favoriateState[i],
-            width: widget.width,
-            height: widget.height,
+                setState(() {
+                  favoriateState[i] = true;
+                  if (widget.buttons1[i].onPressed != null) {
+                    widget.buttons1[i].onPressed!();
+                  }
+                });
+              },
+              isFavourte: favoriateState[i],
+              width: widget.width,
+              height: widget.height,
+            ),
           ),
       ],
     );
@@ -219,8 +221,9 @@ class MyWidget extends StatelessWidget {
   }
 }
 
-class MyButtonList2 extends StatefulWidget {
-  MyButtonList2(
+/////////////////////////////////////////////////////////////////////
+class ButtonList2 extends StatefulWidget {
+  ButtonList2(
       {Key? key,
       required this.buttons,
       required this.height,
@@ -228,13 +231,13 @@ class MyButtonList2 extends StatefulWidget {
       : super(key: key);
   late double height, width;
 
-  final List<ButtonData2> buttons;
+  final List<Button2> buttons;
 
   @override
-  State<MyButtonList2> createState() => _MyButtonList2State();
+  State<ButtonList2> createState() => _ButtonList2State();
 }
 
-class _MyButtonList2State extends State<MyButtonList2> {
+class _ButtonList2State extends State<ButtonList2> {
   late List<bool> favoriateState;
 
   @override
@@ -250,8 +253,8 @@ class _MyButtonList2State extends State<MyButtonList2> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         for (var i = 0; i < widget.buttons.length; i++)
-          MyWidget2(
-            text: widget.buttons[i].text,
+          Widget2(
+            text1: widget.buttons[i].text,
             onPressed: () {
               for (var j = 0; j < favoriateState.length; j++) {
                 favoriateState[j] = false;
@@ -272,25 +275,25 @@ class _MyButtonList2State extends State<MyButtonList2> {
   }
 }
 
-class ButtonData2 {
+class Button2 {
   final String text;
   final Function()? onPressed;
   final bool isFavorite;
 
-  ButtonData2({required this.text, this.onPressed, this.isFavorite = false});
+  Button2({required this.text, this.onPressed, this.isFavorite = false});
 }
 
-class MyWidget2 extends StatelessWidget {
-  const MyWidget2(
+class Widget2 extends StatelessWidget {
+  const Widget2(
       {Key? key,
-      required this.text,
+      required this.text1,
       required this.onPressed,
       required this.width,
       required this.height,
       this.isFavourte = false})
       : super(key: key);
 
-  final String text;
+  final String text1;
   final Function()? onPressed;
   final bool isFavourte;
   final double width;
@@ -305,15 +308,14 @@ class MyWidget2 extends StatelessWidget {
           height: height,
           width: width,
           decoration: BoxDecoration(
-            color: isFavourte ? ColorClass().themeColor2 : ColorClass().white,
-            borderRadius: BorderRadius.circular(10),
-          ),
+              color: isFavourte ? ColorClass().themeColor2 : ColorClass().white,
+              borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Align(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.center,
               child: Text(
-                text,
+                text1,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: ColorClass().black,

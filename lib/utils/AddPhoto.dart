@@ -1,104 +1,83 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-import '../ReUse.dart';
-
-class PhotoDp extends StatefulWidget {
-  const PhotoDp({Key? key}) : super(key: key);
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
 
   @override
-  State<PhotoDp> createState() => _PhotoDpState();
+  _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _PhotoDpState extends State<PhotoDp> {
-  bool loading = false;
-  File? image;
-  final picker = ImagePicker();
-  final databaseRef = FirebaseDatabase.instance.ref('image');
-  Future getImageGallery() async {
-    final pickedFile =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
-    setState(() {
-      if (pickedFile != null) {
-        image = File(pickedFile.path);
-      } else {
-        toast().toastMessage('No image Picked', ColorClass().red);
-      }
+class _ProfileScreenState extends State<ProfileScreen> {
+  double screenHeight = 0;
+  double screenWidth = 0;
+  Color primary = const Color(0xffeef444c);
+  String profilePicLink = "";
+
+  void pickUploadProfilePic() async {
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxHeight: 512,
+      maxWidth: 512,
+      imageQuality: 90,
+    );
+
+    Reference ref = FirebaseStorage.instance.ref().child("profilepic.jpg");
+
+    await ref.putFile(File(image!.path));
+
+    ref.getDownloadURL().then((value) async {
+      setState(() {
+        profilePicLink = value;
+      });
     });
   }
 
-  firebase_storage.FirebaseStorage storage =
-      firebase_storage.FirebaseStorage.instance;
   @override
   Widget build(BuildContext context) {
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: Center(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(20.0),
+            GestureDetector(
+              onTap: () {
+                pickUploadProfilePic();
+              },
               child: Container(
-                height: 100,
-                width: 100,
-                decoration: const BoxDecoration(shape: BoxShape.circle),
-                child: image != null
-                    ? Image.file(image!.absolute)
-                    : const Center(child: Icon(Icons.image)),
+                margin: const EdgeInsets.only(top: 80, bottom: 24),
+                height: 120,
+                width: 120,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: primary,
+                ),
+                child: Center(
+                  child: profilePicLink == " "
+                      ? const Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 80,
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.network(profilePicLink),
+                        ),
+                ),
               ),
             ),
-            const SizedBox(height: 50),
-            Buttons(
-                onPress: () {
-                  getImageGallery();
+            ElevatedButton(
+                onPressed: () {
+                  FirebaseAuth.instance.currentUser
+                      ?.updatePhotoURL(profilePicLink);
                 },
-                height: 50,
-                boxDecoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: ColorClass().themeColor2,
-                ),
-                child: Text('Pick Image')),
-            const SizedBox(height: 20),
-            Buttons(
-                loading: loading,
-                onPress: () async {
-                  setState(() {
-                    loading = true;
-                  });
-                  firebase_storage.Reference ref = firebase_storage
-                      .FirebaseStorage.instance
-                      .ref('/foldername' + '1234');
-                  firebase_storage.UploadTask uploadTask =
-                      ref.putFile(image!.absolute);
-
-                  Future.value(uploadTask).then((value) async {
-                    var newUrl = await ref.getDownloadURL();
-
-                    databaseRef.child('1').set({
-                      'id': '1212',
-                      'image': newUrl.toString(),
-                    });
-                    setState(() {
-                      loading = false;
-                    });
-                    toast().toastMessage('Uploaded', ColorClass().blue);
-                  }).onError((error, stackTrace) {
-                    toast().toastMessage(error.toString(), ColorClass().red);
-                    setState(() {
-                      loading = false;
-                    });
-                  });
-                },
-                height: 50,
-                boxDecoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: ColorClass().themeColor2,
-                ),
-                child: Text('Upload'))
+                child: const Text('Set Profile photo'))
           ],
         ),
       ),

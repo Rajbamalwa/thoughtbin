@@ -41,12 +41,12 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                 setState(() {
                   loading = true;
                 });
-                final crendital = PhoneAuthProvider.credential(
+                final crenditial = PhoneAuthProvider.credential(
                     verificationId: widget.verificationId,
                     smsCode: verificationCodeController.text.toString());
 
                 try {
-                  await auth.signInWithCredential(crendital);
+                  await auth.signInWithCredential(crenditial);
 
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => HomePage()));

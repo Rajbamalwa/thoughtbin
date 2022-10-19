@@ -1,10 +1,19 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:thought_bin/Home/UploadPostScreen.dart';
 import 'package:thought_bin/Intro/IntroScreen.dart';
 import 'package:thought_bin/ReUse.dart';
+import '../Home/HomePage.dart';
 
-class BreathInOut extends StatelessWidget {
+class BreathInOut extends StatefulWidget {
   const BreathInOut({Key? key}) : super(key: key);
 
+  @override
+  State<BreathInOut> createState() => _BreathInOutState();
+}
+
+class _BreathInOutState extends State<BreathInOut> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,8 +42,20 @@ class BreathInOut extends StatelessWidget {
                   const SizedBox(height: 60),
                   TextButton(
                       onPressed: () {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) => IntroScreenWidgets()));
+                        final auth = FirebaseAuth.instance;
+                        final user = auth.currentUser;
+
+                        if (auth.currentUser != null) {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomePage()));
+                        } else {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => IntroScreenWidgets()));
+                        }
                       },
                       child: Text(
                         'Next',

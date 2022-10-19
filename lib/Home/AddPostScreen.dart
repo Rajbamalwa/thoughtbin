@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:thought_bin/Home/HomePage.dart';
+import 'package:thought_bin/Home/UploadPostScreen.dart';
 import 'package:thought_bin/ReUse.dart';
 import 'package:thought_bin/SignIn_SignUp/SignIn.dart';
 
@@ -80,7 +81,7 @@ class _PostScreenState extends State<PostScreen> {
                             ColorClass().themeColor
                           ]),
                       borderRadius: BorderRadius.circular(10)),
-                  padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
                   child: Column(
                     children: [
                       Align(
@@ -101,10 +102,15 @@ class _PostScreenState extends State<PostScreen> {
                           },
                           controller: titleController,
                           decoration: InputDecoration(
+                            border: InputBorder.none,
                             hintText: 'Topic Title',
                             hintStyle: TextStyle(color: ColorClass().white),
                           ),
                         ),
+                      ),
+                      Divider(
+                        color: ColorClass().white,
+                        thickness: 1,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -132,9 +138,10 @@ class _PostScreenState extends State<PostScreen> {
                                   return 'Please Type Description';
                                 }
                               },
-                              maxLines: 15,
+                              maxLines: 14,
                               controller: detailController,
                               decoration: InputDecoration(
+                                border: InputBorder.none,
                                 hintText: 'Description',
                                 hintStyle: TextStyle(
                                     color: ColorClass().black38,

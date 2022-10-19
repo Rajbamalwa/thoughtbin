@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thought_bin/Home/HomePage.dart';
 import 'package:thought_bin/Promise/RelatedPost.dart';
 import 'package:thought_bin/ReUse.dart';
 import '../SignIn_SignUp/SignIn.dart';
@@ -19,6 +18,19 @@ class _PromiseScreenState extends State<PromiseScreen> {
   final promiseController = TextEditingController();
   final auth = FirebaseAuth.instance;
   SignIn signIn = const SignIn();
+  bool showText = false;
+
+  checkText() {
+    String text =
+        'I promise that I will be sympathetic and supportive towards the community.';
+    if (text.toString() != promiseController.text) {
+      toast().toastMessage('Please check your promise', ColorClass().red);
+    } else {
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => const RelatedPostFind()));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,6 +49,24 @@ class _PromiseScreenState extends State<PromiseScreen> {
                 'Please type the following...',
                 style: TextStyle(fontSize: 20, color: ColorClass().black45),
               ),
+              Visibility(
+                  visible: showText,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(),
+                          borderRadius: BorderRadius.circular(10)),
+                      height: 50,
+                      child: const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                              'I promise that I will be sympathetic and supportive towards the community.'),
+                        ),
+                      ),
+                    ),
+                  )),
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Container(
@@ -47,21 +77,22 @@ class _PromiseScreenState extends State<PromiseScreen> {
                   padding: const EdgeInsets.all(5),
                   child: Form(
                     key: formKey,
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please Promise Us';
-                        }
+                    child: TextField(
+                      onChanged: (value) {},
+                      onTap: () {
+                        setState(() {
+                          showText = !showText;
+                        });
                       },
                       controller: promiseController,
                       style: const TextStyle(color: Colors.black45),
                       decoration: const InputDecoration(
                           border: InputBorder.none,
                           hintText:
-                              ' I promise that I will be sympathetic and\n supportive towards the community.'),
+                              'I promise that I will be sympathetic and\n supportive towards the community.'),
                       keyboardType: TextInputType.multiline,
                       minLines: 1, // <-- SEE HERE
-                      maxLines: 5, // <-- SEE HERE
+                      maxLines: 10, // <-- SEE HERE
                     ),
                   ),
                 ),
@@ -69,12 +100,7 @@ class _PromiseScreenState extends State<PromiseScreen> {
               const SizedBox(height: 200),
               TextButton(
                   onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (_) => const RelatedPostFind()));
-                    } else {
-                      debugPrint('Please Promise Us');
-                    }
+                    checkText();
                   },
                   child: const Text(
                     'Next',

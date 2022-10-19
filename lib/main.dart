@@ -6,7 +6,6 @@ import 'Intro/SplashScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp();
   runApp(const MyApp());
 }
@@ -22,6 +21,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Thought bin',
       theme: ThemeData.light(),
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),

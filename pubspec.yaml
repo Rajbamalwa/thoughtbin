@@ -43,13 +43,15 @@ dependencies:
   cloud_firestore: any
   fluttertoast: any
   google_sign_in: ^5.4.2
-  flutter_facebook_auth: ^4.4.1+1
+  flutter_facebook_auth:
   shared_preferences: any
-  gugor_emoji:
   firebase_storage:
+  http: any
   firebase_database:
+  emoji_picker_flutter: ^1.4.0
   image_picker:
-  dropdown_formfield: ^0.1.4
+  gugor_emoji:
+  regexpattern: ^2.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -92,7 +94,10 @@ flutter:
     - family: Galada
       fonts:
         - asset: assets/fonts/Galada-Regular.ttf
-  #     fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+         #     fonts:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700

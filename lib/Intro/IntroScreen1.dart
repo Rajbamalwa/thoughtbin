@@ -50,7 +50,7 @@ class IntroScreen2 extends StatelessWidget {
           children: [
             const SizedBox(height: 100),
             Image.asset('assets/images/IntroImage2.png'),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Text(
               'I promise that I will be sympathetic\n and supportive towards the community.',
               textAlign: TextAlign.center,

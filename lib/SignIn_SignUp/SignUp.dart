@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import '../Promise/Promise.dart';
 import '../ReUse.dart';
+import 'SignIn.dart';
 import 'SignInSignUp/google_signin.dart';
 
 class SignUp extends StatefulWidget {
@@ -32,9 +33,6 @@ class _SignUpState extends State<SignUp> {
 
   final user = FirebaseDatabase.instance.ref('user');
   void signUp() {
-    setState(() {
-      loading = true;
-    });
     _auth
         .createUserWithEmailAndPassword(
             email: emailController.text.toString(),
@@ -258,7 +256,7 @@ class _SignUpState extends State<SignUp> {
             Buttons(
               height: 63,
               onPress: () {
-                FacebookSignIn();
+                facebookLogin();
               },
               boxDecoration: BoxDecoration(
                   border: Border.all(color: ColorClass().black12),
@@ -304,31 +302,17 @@ class _SignUpState extends State<SignUp> {
     );
   }
 
-  void FacebookSignIn() async {
-    setState(() {
-      loading = true;
-    });
+  facebookLogin() async {
+    print("FaceBook");
     try {
-      final facebookLoginResult = await FacebookAuth.instance.login();
-      final userData = await FacebookAuth.instance.getUserData();
-
-      final facebookAuthCredential = FacebookAuthProvider.credential(
-          facebookLoginResult.accessToken!.token);
-      await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
-      await FirebaseFirestore.instance.collection('users').add({
-        'email': userData['email'],
-        'imageUrl': userData['picture']['data']['url'],
-        'name': userData['name'],
-      });
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => PromiseScreen()));
-      addUserDetails(emailController.text);
-    } catch (e) {
-      toast().toastMessage('Something went wrong', ColorClass().red);
-    } finally {
-      setState(() {
-        loading = false;
-      });
+      final result = await FacebookAuth.i
+          .login(permissions: ['public_profile', 'email', 'name']);
+      if (result.status == LoginStatus.success) {
+        final userData = await FacebookAuth.i.getUserData();
+        print(userData);
+      }
+    } catch (error) {
+      print(error);
     }
   }
 }

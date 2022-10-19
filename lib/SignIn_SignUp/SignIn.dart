@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -54,8 +55,7 @@ class _SignInState extends State<SignIn> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context);
-        return true;
+        exit(0);
       },
       child: Scaffold(
         body: SingleChildScrollView(
@@ -176,11 +176,12 @@ class _SignInState extends State<SignIn> {
               Buttons(
                 height: 63,
                 onPress: () {
-                  googleSignIn(context);
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const PromiseScreen()));
+                  googleSignIn(context).whenComplete(() {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const PromiseScreen()));
+                  });
                 },
                 boxDecoration: BoxDecoration(
                     border: Border.all(color: ColorClass().black12),
@@ -204,7 +205,12 @@ class _SignInState extends State<SignIn> {
               Buttons(
                 height: 63,
                 onPress: () {
-                  FacebookSignIn();
+                  facebookLogin().whenCompleted(() {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const PromiseScreen()));
+                  });
                 },
                 boxDecoration: BoxDecoration(
                     border: Border.all(color: Colors.black12),
@@ -251,35 +257,17 @@ class _SignInState extends State<SignIn> {
     );
   }
 
-  void FacebookSignIn() async {
-    setState(() {
-      loading = true;
-    });
+  facebookLogin() async {
+    print("FaceBook");
     try {
-      final facebookLoginResult = await FacebookAuth.instance.login();
-      final userData = await FacebookAuth.instance.getUserData();
-
-      final facebookAuthCredential = FacebookAuthProvider.credential(
-          facebookLoginResult.accessToken!.token);
-      await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
-      await FirebaseFirestore.instance.collection('users').add({
-        'email': userData['email'],
-        'imageUrl': userData['picture']['data']['url'],
-        'name': userData['name'],
-      });
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => PromiseScreen()));
-      Future addUserDetails(String email) async {
-        await FirebaseFirestore.instance.collection('users').add({
-          'email': email,
-        });
+      final result = await FacebookAuth.i
+          .login(permissions: ['public_profile', 'email', 'name']);
+      if (result.status == LoginStatus.success) {
+        final userData = await FacebookAuth.i.getUserData();
+        print(userData);
       }
-    } catch (e) {
-      toast().toastMessage('Something went wrong', ColorClass().red);
-    } finally {
-      setState(() {
-        loading = false;
-      });
+    } catch (error) {
+      print(error);
     }
   }
 }

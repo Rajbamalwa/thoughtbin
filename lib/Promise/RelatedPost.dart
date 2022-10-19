@@ -29,9 +29,10 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
             Text(
               'A Word in Your Mind...',
               style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 30,
-                  color: ColorClass().themeColor2),
+                fontWeight: FontWeight.w700,
+                fontSize: 30,
+                color: ColorClass().themeColor2,
+              ),
             ),
             const SizedBox(height: 30),
             Visibility(
@@ -46,15 +47,15 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        MyButtonList2(
+                        ButtonList2(
                           buttons: [
-                            ButtonData2(text: wantJustice, onPressed: () {}),
-                            ButtonData2(text: careers, onPressed: () {}),
-                            ButtonData2(text: politics, onPressed: () {}),
-                            ButtonData2(text: mentalHealth, onPressed: () {})
+                            Button2(text: wantJustice, onPressed: () {}),
+                            Button2(text: careers, onPressed: () {}),
+                            Button2(text: politics, onPressed: () {}),
+                            Button2(text: mentalHealth, onPressed: () {})
                           ],
                           height: 55,
-                          width: 330,
+                          width: 300,
                         )
                       ],
                     )),

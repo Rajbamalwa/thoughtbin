@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:thought_bin/ReUse.dart';
 import 'package:thought_bin/SignIn_SignUp/SignUp.dart';
@@ -9,12 +8,10 @@ import 'package:thought_bin/SignIn_SignUp/passwordReset.dart';
 import 'package:thought_bin/SignIn_SignUp/setMobileNumber.dart';
 import 'package:thought_bin/utils/AddPhoto.dart';
 import '../SignIn_SignUp/SignIn.dart';
-import '../utils/AddUserName.dart';
-import '../utils/Language.dart';
 
 class AccountScreen extends StatefulWidget {
-  final String name;
-  const AccountScreen({super.key, required this.name});
+  const AccountScreen({super.key});
+
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
@@ -23,16 +20,21 @@ class _AccountScreenState extends State<AccountScreen> {
   final auth = FirebaseAuth.instance;
   final userEmail = FirebaseDatabase.instance.ref('user');
   final fireStore = FirebaseFirestore.instance.collection('user').snapshots();
-  late String userName;
+  final userNameController = TextEditingController();
+  final user = FirebaseDatabase.instance.ref('user');
+  late bool isLogin = false;
 
   @override
   Widget build(BuildContext context) {
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    var image;
     return Scaffold(
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(
+              height: 30,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -74,13 +76,15 @@ class _AccountScreenState extends State<AccountScreen> {
                             shape: BoxShape.circle, color: ColorClass().white),
                         child: Padding(
                           padding: const EdgeInsets.all(3.0),
-                          child: GestureDetector(
-                            onTap: () {},
-                            child: const Image(
-                              image: AssetImage('assets/images/eye.png'),
-                              fit: BoxFit.fill,
-                            ),
-                          ),
+                          child: Container(
+                              height: 90,
+                              width: 90,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      image: image ??
+                                          NetworkImage(
+                                              '${FirebaseAuth.instance.currentUser?.photoURL}')))),
                         ),
                       ),
                     ),
@@ -100,7 +104,8 @@ class _AccountScreenState extends State<AccountScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const PhotoDp()));
+                                    builder: (context) =>
+                                        const ProfileScreen()));
                           },
                           icon: Icon(
                             Icons.edit,
@@ -113,10 +118,9 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
             const SizedBox(height: 30),
             AccountWidget(
-              text: 'user Name',
+              text: '${FirebaseAuth.instance.currentUser!.displayName}',
               onPress: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddUserName()));
+                showMyDialog(userNameController.text.toString());
               },
             ),
             AccountWidget(
@@ -135,7 +139,7 @@ class _AccountScreenState extends State<AccountScreen> {
               },
             ),
             AccountWidget(
-              text: '${FirebaseAuth.instance.currentUser?.phoneNumber}',
+              text: 'Number ${FirebaseAuth.instance.currentUser?.phoneNumber}',
               onPress: () {
                 Navigator.push(
                     context,
@@ -146,17 +150,25 @@ class _AccountScreenState extends State<AccountScreen> {
             AccountWidget(
               text: 'Add another Account',
               onPress: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const SignIn()));
+                toast().toastMessage(
+                    'Apologies for the fact that you can not add more then 1 account now , Our team is working on it so you can add multiple account soon',
+                    ColorClass().red);
+              },
+            ),
+            AccountWidget(
+              text: 'Delete Account',
+              onPress: () {
+                toast().toastMessage(
+                    'If you want to delete your account then email us on sendhere819@gmail.com with your email id and username',
+                    ColorClass().red);
               },
             ),
             AccountWidget(
               text: 'Language',
               onPress: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ChooseLanguage()));
+                toast().toastMessage(
+                    'Apologies for the fact that we are showing you in only one language, we will bring more languages for you very soon.',
+                    ColorClass().red);
               },
             ),
             Padding(
@@ -164,8 +176,8 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Buttons(
                 onPress: () {
                   auth.signOut().then((value) {
-                    Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => SignIn()));
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => const SignIn()));
                   }).onError((error, stackTrace) {
                     toast().toastMessage(error.toString(), Colors.red);
                   });
@@ -181,6 +193,36 @@ class _AccountScreenState extends State<AccountScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> showMyDialog(String userName) async {
+    userNameController.text = userName;
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Update'),
+            content: Container(
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(20)),
+              child: TextField(
+                controller: userNameController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(2)))),
+              ),
+            ),
+            actions: [
+              TextButton(
+                  child: const Text('Add User Name'),
+                  onPressed: () {
+                    auth.currentUser
+                        ?.updateDisplayName(userNameController.text);
+                  }),
+            ],
+          );
+        });
   }
 }
 

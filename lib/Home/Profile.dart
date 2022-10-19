@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
@@ -24,8 +25,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final posts = FirebaseDatabase.instance.ref('title');
   TextEditingController searchController = TextEditingController();
   TextEditingController editController = TextEditingController();
+  bool isLogin = true;
+
   @override
   Widget build(BuildContext context) {
+    var image;
     return Scaffold(
       body: Column(
         children: [
@@ -51,11 +55,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         shape: BoxShape.circle, color: ColorClass().white),
                     child: Padding(
                       padding: const EdgeInsets.all(3.0),
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: const Image(
-                            fit: BoxFit.fill,
-                            image: AssetImage('assets/images/eye.png')),
+                      child: Container(
+                        height: 70,
+                        width: 70,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                                image: image ??
+                                    NetworkImage(
+                                        '${FirebaseAuth.instance.currentUser?.photoURL}'))),
                       ),
                     ),
                   ),
@@ -71,9 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: IconButton(
                         onPressed: () {
                           Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const AccountScreen(
-                                    name: '',
-                                  )));
+                              builder: (context) => const AccountScreen()));
                         },
                         icon: Icon(
                           Icons.edit,
@@ -83,11 +89,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 160, 10, 0),
+                padding: const EdgeInsets.fromLTRB(0, 180, 10, 0),
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Text(
-                    'UserName',
+                    '${FirebaseAuth.instance.currentUser!.displayName}',
                     style: TextStyle(
                         color: ColorClass().themeColor2,
                         fontSize: 20,
@@ -96,11 +102,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 185, 10, 0),
+                padding: const EdgeInsets.fromLTRB(0, 200, 10, 0),
                 child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Text(
-                      'This information will not be public pon the app',
+                      'This information will not be public on the app',
                       style: TextStyle(color: ColorClass().black45),
                     )),
               ),
@@ -111,13 +117,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Container(
                 height: 40,
                 decoration: BoxDecoration(
+                  color: Colors.teal.shade50,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     MyButtonList(
-                      buttons: [
+                      buttons1: [
                         ButtonData(
                             text: 'My Drafts',
                             onPressed: () {
@@ -175,7 +182,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Expanded(
               child: FirebaseAnimatedList(
                 query: draft,
-                defaultChild: Text('Loading'),
+                defaultChild: const SizedBox(
+                    height: 50,
+                    child: Center(child: CircularProgressIndicator())),
                 itemBuilder: (context, snapshot, animation, index) {
                   final title = snapshot.child('title').value.toString();
                   final id = snapshot.child('id').value.toString();
@@ -213,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           onPressed: () {
                                             showMyDialog(title, id.toString());
                                           },
-                                          icon: Icon(Icons.edit)),
+                                          icon: const Icon(Icons.edit)),
                                       IconButton(
                                           onPressed: () {
                                             draft
@@ -223,7 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                     .toString())
                                                 .remove();
                                           },
-                                          icon: Icon(Icons.delete)),
+                                          icon: const Icon(Icons.delete)),
                                     ],
                                   )
                                 ],
@@ -284,7 +293,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             showMyDialog(
                                                 'title', id.toString());
                                           },
-                                          icon: Icon(Icons.edit)),
+                                          icon: const Icon(Icons.edit)),
                                       IconButton(
                                           onPressed: () {
                                             draft
@@ -294,7 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                     .toString())
                                                 .remove();
                                           },
-                                          icon: Icon(Icons.delete)),
+                                          icon: const Icon(Icons.delete)),
                                     ],
                                   )
                                 ],
@@ -332,7 +341,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Expanded(
               child: FirebaseAnimatedList(
                 query: posts,
-                defaultChild: const Text('Loading'),
+                defaultChild: const SizedBox(
+                    height: 50,
+                    child: Center(child: CircularProgressIndicator())),
                 itemBuilder: (context, snapshot, animation, index) {
                   final title = snapshot.child('title').value.toString();
                   if (searchController.text.isEmpty) {
@@ -473,7 +484,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Expanded(
               child: FirebaseAnimatedList(
                 query: saved,
-                defaultChild: const Text('Loading'),
+                defaultChild: const SizedBox(
+                    height: 50,
+                    child: Center(child: CircularProgressIndicator())),
                 itemBuilder: (context, snapshot, animation, index) {
                   return Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -504,7 +517,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     onTap: () {
                                       saved
                                           .child(snapshot
-                                              .child('title')
+                                              .child('')
                                               .value
                                               .toString())
                                           .remove();
