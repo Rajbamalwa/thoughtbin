@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:thought_bin/SignIn_SignUp/SignIn.dart';
-import '../ReUse.dart';
+import 'package:thought_bin/SignIn_SignUp/SignInSignUp/SignIn.dart';
+import '../utils/ReUse.dart';
 
 class IntroScreen1 extends StatelessWidget {
   const IntroScreen1({Key? key}) : super(key: key);
@@ -25,7 +25,7 @@ class IntroScreen1 extends StatelessWidget {
             Text(
               'Swipe to Next',
               style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 17,
                   color: ColorClass().blue,
                   fontWeight: FontWeight.w600),
             ),
@@ -42,21 +42,20 @@ class IntroScreen2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Center(
-            child: Column(
+      body: Center(
+          child: SingleChildScrollView(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const SizedBox(height: 100),
             Image.asset('assets/images/IntroImage2.png'),
-            const SizedBox(height: 40),
+            SizedBox(height: 50),
             Text(
               'I promise that I will be sympathetic\n and supportive towards the community.',
               textAlign: TextAlign.center,
               style: TextStyle(color: ColorClass().grey, fontSize: 15),
             ),
-            const SizedBox(height: 180),
+            const SizedBox(height: 250),
             TextButton(
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
@@ -70,8 +69,8 @@ class IntroScreen2 extends StatelessWidget {
                   ),
                 )),
           ],
-        )),
-      ),
+        ),
+      )),
     );
   }
 }

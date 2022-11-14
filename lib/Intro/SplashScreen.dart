@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thought_bin/Home/HomePage.dart';
 import 'package:thought_bin/Intro/BreathInOutScreen.dart';
-import 'package:thought_bin/ReUse.dart';
+import 'package:thought_bin/utils/ReUse.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -29,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: ColorClass().themeColor2,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.only(left: 25, right: 25),
+          padding: EdgeInsets.only(left: 25, right: 25),
           child: Container(
             height: 80,
             width: MediaQuery.of(context).size.width,
@@ -41,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Column(
-                    children: const [
+                    children: [
                       Align(
                         alignment: Alignment.topCenter,
                         child: RotationTransition(
@@ -62,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Text(
-                      'ThoughtBin',
+                      'Thoughts Bin',
                       style: TextStyle(
                           fontFamily: 'Galada',
                           fontSize: 40,

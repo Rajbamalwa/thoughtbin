@@ -1,4 +1,4 @@
-def localProperties = new Properties()
+def localProperties =  Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
@@ -60,9 +60,8 @@ flutter {
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 dependencies {
-    implementation platform('com.google.firebase:firebase-bom:30.4.1')
+    implementation 'com.facebook.android:facebook-android-sdk:15.0.2'
+    implementation platform('com.google.firebase:firebase-bom:31.0.2')
     implementation 'com.google.firebase:firebase-analytics'
-    implementation platform('com.google.firebase:firebase-bom:30.5.0')
     implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
 }

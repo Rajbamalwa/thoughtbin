@@ -1,8 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thought_bin/Home/HomePage.dart';
-import 'package:thought_bin/Home/Profile.dart';
-import '../ReUse.dart';
+import '../../utils/ReUse.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   final String verificationId;
@@ -46,7 +46,8 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                     smsCode: verificationCodeController.text.toString());
 
                 try {
-                  await auth.signInWithCredential(crenditial);
+                  await FirebaseAuth.instance.currentUser
+                      ?.updatePhoneNumber(crenditial);
 
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => HomePage()));
@@ -56,6 +57,19 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                   });
                   toast().toastMessage(e.toString(), ColorClass().red);
                 }
+                FirebaseFirestore.instance
+                    .collection(
+                        FirebaseAuth.instance.currentUser!.email.toString())
+                    .doc('Details')
+                    .update({
+                  'Number': FirebaseAuth.instance.currentUser
+                      ?.updatePhoneNumber(crenditial)
+                      .toString(),
+                }).then((value) {
+                  toast().toastMessage('Posted', Colors.blue);
+                }).onError((error, stackTrace) {
+                  toast().toastMessage(error.toString(), Colors.red);
+                });
               },
               height: 50,
               boxDecoration: BoxDecoration(

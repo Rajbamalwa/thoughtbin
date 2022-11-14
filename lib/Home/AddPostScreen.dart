@@ -1,65 +1,41 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:thought_bin/Home/HomePage.dart';
-import 'package:thought_bin/Home/UploadPostScreen.dart';
-import 'package:thought_bin/ReUse.dart';
-import 'package:thought_bin/SignIn_SignUp/SignIn.dart';
+import 'package:thought_bin/utils/ReUse.dart';
+import 'package:thought_bin/SignIn_SignUp/SignInSignUp/SignIn.dart';
 
 class PostScreen extends StatefulWidget {
-  const PostScreen({
-    Key? key,
-  }) : super(key: key);
   @override
   State<PostScreen> createState() => _PostScreenState();
 }
 
 class _PostScreenState extends State<PostScreen> {
-  List<String> myList = <String>[];
-
-  void onTitleAndDetailCreated(String title, String detail) {
-    setState(() {
-      myList.add(title);
-    });
-    setState(() {
-      myList.add(detail);
-    });
-  }
-
   TextEditingController titleController = TextEditingController();
   TextEditingController detailController = TextEditingController();
-  final auth = FirebaseAuth.instance;
   SignIn signIn = const SignIn();
   final topicKey = GlobalKey<FormState>();
   final detailKey = GlobalKey<FormState>();
   bool checkBoxValue = false;
   bool loading = false;
-  final titledatabase = FirebaseDatabase.instance.ref('title');
-  final detaildatabase = FirebaseDatabase.instance.ref('detail');
-  final draftdatabase = FirebaseDatabase.instance.ref('draft');
-
+  final userDraft =
+      FirebaseDatabase.instance.ref(FirebaseAuth.instance.currentUser!.uid);
+  final userPosts =
+      FirebaseDatabase.instance.ref(FirebaseAuth.instance.currentUser!.uid);
+  final posts = FirebaseDatabase.instance.ref('posts');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorClass().white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: ColorClass().white,
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(10, 40, 9, 2),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HomePage()));
-                      },
-                      icon: const Icon(Icons.arrow_back_ios_rounded)),
-                ),
-              ),
               Align(
                   alignment: Alignment.center,
                   child: Text(
@@ -70,7 +46,7 @@ class _PostScreenState extends State<PostScreen> {
                         fontWeight: FontWeight.w600),
                   )),
               Padding(
-                padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                padding: const EdgeInsets.fromLTRB(10, 40, 10, 0),
                 child: Container(
                   decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -102,15 +78,10 @@ class _PostScreenState extends State<PostScreen> {
                           },
                           controller: titleController,
                           decoration: InputDecoration(
-                            border: InputBorder.none,
                             hintText: 'Topic Title',
                             hintStyle: TextStyle(color: ColorClass().white),
                           ),
                         ),
-                      ),
-                      Divider(
-                        color: ColorClass().white,
-                        thickness: 1,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 10, bottom: 10),
@@ -124,7 +95,7 @@ class _PostScreenState extends State<PostScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(2.0),
                         child: Container(
                           decoration: BoxDecoration(
                               color: ColorClass().white,
@@ -138,11 +109,11 @@ class _PostScreenState extends State<PostScreen> {
                                   return 'Please Type Description';
                                 }
                               },
-                              maxLines: 14,
+                              maxLines: 15,
                               controller: detailController,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: 'Description',
+                                hintText: 'Topic Details',
                                 hintStyle: TextStyle(
                                     color: ColorClass().black38,
                                     decoration: TextDecoration.none),
@@ -155,63 +126,75 @@ class _PostScreenState extends State<PostScreen> {
                   ),
                 ),
               ),
-              Row(
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: ClipOval(
-                      child: Image(
-                        image: AssetImage('assets/images/eye.png'),
-                        height: 40,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 10),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Posting as Anonymous',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
               Padding(
-                padding: const EdgeInsets.only(
-                    left: 10, right: 10, top: 5, bottom: 7),
-                child: draft_post(() {
-                  if (topicKey.currentState!.validate() &&
-                      detailKey.currentState!.validate()) {
-                    setState(() {
-                      loading = true;
-                    });
-                    String id =
-                        DateTime.now().microsecondsSinceEpoch.toString();
-                    titledatabase.child(id).set({
-                      'id': id,
-                      'title': titleController.text.toString(),
-                      'detail': detailController.text.toString(),
-                    }).then((value) {
-                      toast().toastMessage('Posted', Colors.blue);
-                      setState(() {
-                        loading = false;
-                      });
-                    }).onError((error, stackTrace) {
-                      toast().toastMessage('Error', Colors.red);
-                      setState(() {
-                        loading = false;
-                      });
-                    });
-                  } else {
-                    return toast().toastMessage('Error', Colors.red);
-                  }
-                }, 'Post'),
+                padding:
+                    EdgeInsets.only(left: 80, right: 80, top: 15, bottom: 5),
+                child: Buttons(
+                    height: 50,
+                    boxDecoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              ColorClass().themeColor2,
+                              ColorClass().themeColor,
+                            ])),
+                    onPress: () {
+                      if (topicKey.currentState!.validate() &&
+                          detailKey.currentState!.validate()) {
+                        setState(() {
+                          loading = true;
+                        });
+
+                        String id =
+                            DateTime.now().microsecondsSinceEpoch.toString();
+                        posts.child(id).update({
+                          'title': titleController.text,
+                          'id': id,
+                          'detail': detailController.text,
+                          'Likes': [],
+                        }).then((value) {
+                          toast().toastMessage('Posted', Colors.blue);
+                          setState(() {
+                            loading = false;
+                            titleController.clear();
+                            detailController.clear();
+                          });
+                        }).onError((error, stackTrace) {
+                          toast().toastMessage(error.toString(), Colors.red);
+                          setState(() {
+                            loading = false;
+                          });
+                        });
+
+                        userPosts.child('posts').update({
+                          id: {
+                            'title': titleController.text,
+                            'id': id,
+                            'detail': detailController.text,
+                          }
+                        }).then((value) {
+                          toast().toastMessage('Posted', Colors.blue);
+                          setState(() {
+                            loading = false;
+                            titleController.clear();
+                            detailController.clear();
+                          });
+                        }).onError((error, stackTrace) {
+                          toast().toastMessage(error.toString(), Colors.red);
+                          setState(() {
+                            loading = false;
+                          });
+                        });
+                      } else {
+                        return toast().toastMessage('Error', Colors.red);
+                      }
+                    },
+                    child: Text('Post')),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   TextButton(
                       onPressed: () {
@@ -220,13 +203,16 @@ class _PostScreenState extends State<PostScreen> {
                           setState(() {
                             loading = true;
                           });
-                          draftdatabase
-                              .child(DateTime.now()
-                                  .microsecondsSinceEpoch
-                                  .toString())
-                              .set({
-                            'title': titleController.text.toString(),
-                            'detail': detailController.text.toString(),
+
+                          String id =
+                              DateTime.now().microsecondsSinceEpoch.toString();
+
+                          userDraft.child('draft').set({
+                            id: {
+                              'title': titleController.text,
+                              'id': id,
+                              'detail': detailController.text,
+                            }
                           }).then((value) {
                             toast().toastMessage('Drafted', Colors.blue);
                             setState(() {
@@ -235,7 +221,7 @@ class _PostScreenState extends State<PostScreen> {
                               detailController.clear();
                             });
                           }).onError((error, stackTrace) {
-                            toast().toastMessage('Error', Colors.red);
+                            toast().toastMessage(error.toString(), Colors.red);
                             setState(() {
                               loading = false;
                             });
@@ -250,22 +236,27 @@ class _PostScreenState extends State<PostScreen> {
                             color: ColorClass().themeColor2,
                             decoration: TextDecoration.underline),
                       )),
-                  const SizedBox(width: 50),
-                  Checkbox(
-                    value: checkBoxValue,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        if (checkBoxValue == true) {}
-                        checkBoxValue = value!;
-                      });
-                    },
-                  ),
-                  Text(
-                    'Turn off Reactions',
-                    style: TextStyle(
-                        color: ColorClass().themeColor2,
-                        decoration: TextDecoration.underline),
-                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Checkbox(
+                        activeColor: ColorClass().themeColor2,
+                        value: checkBoxValue,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (checkBoxValue == true) {}
+                            checkBoxValue = value!;
+                          });
+                        },
+                      ),
+                      Text(
+                        'Turn off Reactions',
+                        style: TextStyle(
+                            color: ColorClass().themeColor2,
+                            decoration: TextDecoration.underline),
+                      ),
+                    ],
+                  )
                 ],
               )
             ],

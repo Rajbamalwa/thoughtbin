@@ -52,9 +52,19 @@ dependencies:
   image_picker:
   gugor_emoji:
   regexpattern: ^2.1.0
+  readmore: ^2.2.0
+  searchfield: ^0.7.2
+  showcaseview:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.8.1
+flutter_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/images/appIcon.png"
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

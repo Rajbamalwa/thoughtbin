@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:thought_bin/Intro/IntroScreen1.dart';
-import 'package:thought_bin/ReUse.dart';
+import 'package:thought_bin/utils/ReUse.dart';
 
 class IntroScreenWidgets extends StatelessWidget {
   final _controller = PageController();
-
-  IntroScreenWidgets({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +13,7 @@ class IntroScreenWidgets extends StatelessWidget {
       children: [
         PageView(
           controller: _controller,
-          children: const [
+          children: [
             IntroScreen1(),
             IntroScreen2(),
           ],

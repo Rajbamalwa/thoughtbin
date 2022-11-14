@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thought_bin/ReUse.dart';
+import 'package:thought_bin/utils/ReUse.dart';
 import 'otpScreen.dart';
 
 class SetMobileNo extends StatefulWidget {
@@ -34,8 +34,10 @@ class _SetMobileNoState extends State<SetMobileNo> {
               height: 80,
             ),
             TextFormField(
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               controller: phoneNumberController,
               decoration: InputDecoration(
+                  icon: Icon(Icons.call),
                   hintText: '+918765432198',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10))),

@@ -2,11 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import '../Promise/Promise.dart';
-import '../ReUse.dart';
+import '../../Promise/Promise.dart';
+import '../../utils/ReUse.dart';
 import 'SignIn.dart';
-import 'SignInSignUp/google_signin.dart';
+import 'google_signin.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -23,6 +22,7 @@ class _SignUpState extends State<SignUp> {
   final bool _isChecked = false;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -32,6 +32,7 @@ class _SignUpState extends State<SignUp> {
   }
 
   final user = FirebaseDatabase.instance.ref('user');
+
   void signUp() {
     _auth
         .createUserWithEmailAndPassword(
@@ -44,6 +45,11 @@ class _SignUpState extends State<SignUp> {
       setState(() {
         loading = false;
       });
+      SaveUserData(
+        emailController.text.toString(),
+        FirebaseAuth.instance.currentUser!.displayName.toString(),
+        FirebaseAuth.instance.currentUser!.phoneNumber.toString(),
+      );
     }).onError((error, stackTrace) {
       toast().toastMessage(error.toString(), Colors.red);
       setState(() {
@@ -133,10 +139,11 @@ class _SignUpState extends State<SignUp> {
                     width: 24.0,
                     child: Checkbox(
                         value: checkBoxValue,
-                        activeColor: Colors.green,
+                        activeColor: ColorClass().themeColor2,
                         onChanged: (newValue) {
                           setState(() {
                             if (checkBoxValue == true) {}
+
                             checkBoxValue = newValue!;
                           });
                         }),
@@ -152,20 +159,14 @@ class _SignUpState extends State<SignUp> {
               height: 63,
               loading: loading,
               onPress: () {
-                if (formKey.currentState!.validate()) {
+                if (formKey.currentState!.validate() && checkBoxValue == true) {
                   signUp();
-                  user
-                      .child(DateTime.now().microsecondsSinceEpoch.toString())
-                      .set({
-                        'email': emailController.text.toString(),
-                        'password': passwordController.text.toString(),
-                      })
-                      .then((value) {})
-                      .onError((error, stackTrace) {
-                        toast().toastMessage('Error', Colors.red);
-                      });
                 } else {
-                  return toast().toastMessage('Error', Colors.red);
+                  if (checkBoxValue == true) {
+                  } else {
+                    toast().toastMessage(
+                        'please agree the conditions', Colors.blue);
+                  }
                 }
               },
               boxDecoration: BoxDecoration(
@@ -199,83 +200,8 @@ class _SignUpState extends State<SignUp> {
                     )),
               ),
             ]),
-            Buttons(
-              height: 63,
-              onPress: () {
-                user
-                    .child(DateTime.now().microsecondsSinceEpoch.toString())
-                    .set({
-                      'email': emailController.text.toString(),
-                      'password': passwordController.text.toString(),
-                    })
-                    .then((value) {})
-                    .onError((error, stackTrace) {
-                      toast().toastMessage('Error', Colors.red);
-                    })
-                    .onError((error, stackTrace) {
-                      toast().toastMessage(error.toString(), ColorClass().red);
-                    });
-
-                try {
-                  setState(() {
-                    loading = true;
-                  });
-                  googleSignIn(context);
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => const PromiseScreen()));
-                  toast().toastMessage('Account Created', Colors.blue);
-                  setState(() {
-                    loading = false;
-                  });
-                  addUserDetails(emailController.text);
-                } catch (e) {
-                  setState(() {
-                    loading = false;
-                  });
-                  toast().toastMessage(e.toString(), Colors.red);
-                }
-              },
-              boxDecoration: BoxDecoration(
-                  border: Border.all(color: ColorClass().black12),
-                  borderRadius: BorderRadius.circular(10),
-                  color: ColorClass().white),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
-                    child: Image.asset('assets/images/google.png'),
-                  ),
-                  Text(
-                    'Continue With Google',
-                    style: TextStyle(color: ColorClass().black54, fontSize: 20),
-                  )
-                ],
-              ),
-            ),
-            Buttons(
-              height: 63,
-              onPress: () {
-                facebookLogin();
-              },
-              boxDecoration: BoxDecoration(
-                  border: Border.all(color: ColorClass().black12),
-                  borderRadius: BorderRadius.circular(10),
-                  color: ColorClass().white),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
-                    child: Image.asset('assets/images/facebook.png'),
-                  ),
-                  Text(
-                    'Continue With Facebook',
-                    style: TextStyle(color: ColorClass().black54, fontSize: 20),
-                  ),
-                ],
-              ),
-            ),
+            googleButton(),
+            facebookButton(),
             Padding(
               padding: const EdgeInsets.only(bottom: 10, top: 90),
               child: Row(
@@ -300,19 +226,5 @@ class _SignUpState extends State<SignUp> {
         )),
       ),
     );
-  }
-
-  facebookLogin() async {
-    print("FaceBook");
-    try {
-      final result = await FacebookAuth.i
-          .login(permissions: ['public_profile', 'email', 'name']);
-      if (result.status == LoginStatus.success) {
-        final userData = await FacebookAuth.i.getUserData();
-        print(userData);
-      }
-    } catch (error) {
-      print(error);
-    }
   }
 }

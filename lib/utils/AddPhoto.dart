@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+import 'package:thought_bin/utils/ReUse.dart';
+
+class AddPhoto extends StatefulWidget {
+  const AddPhoto({Key? key}) : super(key: key);
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  _AddPhotoState createState() => _AddPhotoState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _AddPhotoState extends State<AddPhoto> {
   double screenHeight = 0;
   double screenWidth = 0;
   Color primary = const Color(0xffeef444c);
@@ -59,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: primary,
                 ),
                 child: Center(
-                  child: profilePicLink == " "
+                  child: profilePicLink == ""
                       ? const Icon(
                           Icons.person,
                           color: Colors.white,
@@ -75,7 +77,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ElevatedButton(
                 onPressed: () {
                   FirebaseAuth.instance.currentUser
-                      ?.updatePhotoURL(profilePicLink);
+                      ?.updatePhotoURL(profilePicLink)
+                      .then((value) {
+                    toast().toastMessage('Profile Set', ColorClass().blue);
+                  }).onError((error, stackTrace) {
+                    toast().toastMessage(error.toString(), ColorClass().red);
+                  });
                 },
                 child: const Text('Set Profile photo'))
           ],

@@ -1,14 +1,11 @@
 import 'dart:io';
-
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:thought_bin/Promise/Promise.dart';
-import 'package:thought_bin/SignIn_SignUp/SignUp.dart';
+import 'package:thought_bin/Promise/RelatedPost.dart';
+import 'package:thought_bin/SignIn_SignUp/SignInSignUp/SignUp.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:thought_bin/SignIn_SignUp/passwordReset.dart';
-import '../ReUse.dart';
-import 'SignInSignUp/google_signin.dart';
+import 'package:thought_bin/SignIn_SignUp/phoneSignIn/passwordReset.dart';
+import '../../utils/ReUse.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
@@ -22,12 +19,8 @@ class _SignInState extends State<SignIn> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
-  final user = FirebaseDatabase.instance.ref('user');
-
-  @override
   bool checkBoxValue = false;
-
-  void SignIn() {
+  SignIn() {
     setState(() {
       loading = true;
     });
@@ -35,10 +28,20 @@ class _SignInState extends State<SignIn> {
         .signInWithEmailAndPassword(
             email: emailController.text,
             password: passwordController.text.toString())
-        .then((value) {
+        .then((value) async {
+      AuthCredential credential = EmailAuthProvider.credential(
+          email: emailController.text, password: passwordController.text);
+      UserCredential userCred = await _auth.signInWithCredential(credential);
+      bool? isNewUser = userCred.additionalUserInfo?.isNewUser;
+
       toast().toastMessage(value.user!.email.toString(), Colors.blue);
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => PromiseScreen()));
+      if (isNewUser == true) {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => PromiseScreen()));
+      } else {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => RelatedPostFind()));
+      }
       setState(() {
         loading = false;
       });
@@ -46,7 +49,7 @@ class _SignInState extends State<SignIn> {
       debugPrint(error.toString());
       toast().toastMessage(error.toString(), Colors.red);
       setState(() {
-        loading = true;
+        loading = false;
       });
     });
   }
@@ -173,64 +176,8 @@ class _SignInState extends State<SignIn> {
                 ),
               ]),
               const SizedBox(height: 20),
-              Buttons(
-                height: 63,
-                onPress: () {
-                  googleSignIn(context).whenComplete(() {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const PromiseScreen()));
-                  });
-                },
-                boxDecoration: BoxDecoration(
-                    border: Border.all(color: ColorClass().black12),
-                    borderRadius: BorderRadius.circular(10),
-                    color: ColorClass().white),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
-                      child: Image.asset('assets/images/google.png'),
-                    ),
-                    Text(
-                      'Continue With Google',
-                      style:
-                          TextStyle(color: ColorClass().black54, fontSize: 20),
-                    )
-                  ],
-                ),
-              ),
-              Buttons(
-                height: 63,
-                onPress: () {
-                  facebookLogin().whenCompleted(() {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const PromiseScreen()));
-                  });
-                },
-                boxDecoration: BoxDecoration(
-                    border: Border.all(color: Colors.black12),
-                    borderRadius: BorderRadius.circular(10),
-                    color: ColorClass().white),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 5, 10, 5),
-                      child: Image.asset('assets/images/facebook.png'),
-                    ),
-                    Text(
-                      'Continue With Facebook',
-                      style:
-                          TextStyle(color: ColorClass().black54, fontSize: 20),
-                    ),
-                  ],
-                ),
-              ),
+              googleButton(),
+              facebookButton(),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10, top: 40),
                 child: Row(
@@ -255,19 +202,5 @@ class _SignInState extends State<SignIn> {
         ),
       ),
     );
-  }
-
-  facebookLogin() async {
-    print("FaceBook");
-    try {
-      final result = await FacebookAuth.i
-          .login(permissions: ['public_profile', 'email', 'name']);
-      if (result.status == LoginStatus.success) {
-        final userData = await FacebookAuth.i.getUserData();
-        print(userData);
-      }
-    } catch (error) {
-      print(error);
-    }
   }
 }

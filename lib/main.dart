@@ -1,7 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:thought_bin/Promise/RelatedPost.dart';
-
 import 'Intro/SplashScreen.dart';
 
 void main() async {
