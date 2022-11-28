@@ -26,178 +26,118 @@ class _PostScreenState extends State<PostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ColorClass().white,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: ColorClass().white,
-      ),
       body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Pour Your Heart Out',
-                    style: TextStyle(
-                        color: ColorClass().themeColor2,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600),
-                  )),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 40, 10, 0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            ColorClass().themeColor2,
-                            ColorClass().themeColor
-                          ]),
-                      borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Title',
-                          style: TextStyle(
-                              color: ColorClass().white, fontSize: 20),
-                        ),
-                      ),
-                      Form(
-                        key: topicKey,
-                        child: TextFormField(
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please Type Title';
-                            }
-                          },
-                          controller: titleController,
-                          decoration: InputDecoration(
-                            hintText: 'Topic Title',
-                            hintStyle: TextStyle(color: ColorClass().white),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 10),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Details',
-                            style: TextStyle(
-                                color: ColorClass().white, fontSize: 20),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                              color: ColorClass().white,
-                              borderRadius: BorderRadius.circular(10)),
-                          padding: EdgeInsets.all(8),
-                          child: Form(
-                            key: detailKey,
-                            child: TextFormField(
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Please Type Description';
-                                }
-                              },
-                              maxLines: 15,
-                              controller: detailController,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Topic Details',
-                                hintStyle: TextStyle(
-                                    color: ColorClass().black38,
-                                    decoration: TextDecoration.none),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    EdgeInsets.only(left: 80, right: 80, top: 15, bottom: 5),
-                child: Buttons(
-                    height: 50,
-                    boxDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 70),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      'Pour Your Heart Out',
+                      style: TextStyle(
+                          color: ColorClass().themeColor2,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600),
+                    )),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 40, 10, 0),
+                  child: Container(
+                    decoration: BoxDecoration(
                         gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
                               ColorClass().themeColor2,
-                              ColorClass().themeColor,
-                            ])),
-                    onPress: () {
-                      if (topicKey.currentState!.validate() &&
-                          detailKey.currentState!.validate()) {
-                        setState(() {
-                          loading = true;
-                        });
-
-                        String id =
-                            DateTime.now().microsecondsSinceEpoch.toString();
-                        posts.child(id).update({
-                          'title': titleController.text,
-                          'id': id,
-                          'detail': detailController.text,
-                          'Likes': [],
-                        }).then((value) {
-                          toast().toastMessage('Posted', Colors.blue);
-                          setState(() {
-                            loading = false;
-                            titleController.clear();
-                            detailController.clear();
-                          });
-                        }).onError((error, stackTrace) {
-                          toast().toastMessage(error.toString(), Colors.red);
-                          setState(() {
-                            loading = false;
-                          });
-                        });
-
-                        userPosts.child('posts').update({
-                          id: {
-                            'title': titleController.text,
-                            'id': id,
-                            'detail': detailController.text,
-                          }
-                        }).then((value) {
-                          toast().toastMessage('Posted', Colors.blue);
-                          setState(() {
-                            loading = false;
-                            titleController.clear();
-                            detailController.clear();
-                          });
-                        }).onError((error, stackTrace) {
-                          toast().toastMessage(error.toString(), Colors.red);
-                          setState(() {
-                            loading = false;
-                          });
-                        });
-                      } else {
-                        return toast().toastMessage('Error', Colors.red);
-                      }
-                    },
-                    child: Text('Post')),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  TextButton(
-                      onPressed: () {
+                              ColorClass().themeColor
+                            ]),
+                        borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Title',
+                            style: TextStyle(
+                                color: ColorClass().white, fontSize: 20),
+                          ),
+                        ),
+                        Form(
+                          key: topicKey,
+                          child: TextFormField(
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Please Type Title';
+                              }
+                            },
+                            controller: titleController,
+                            decoration: InputDecoration(
+                              hintText: 'Topic Title',
+                              hintStyle: TextStyle(color: ColorClass().white),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10, bottom: 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Details',
+                              style: TextStyle(
+                                  color: ColorClass().white, fontSize: 20),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: ColorClass().white,
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: EdgeInsets.all(8),
+                            child: Form(
+                              key: detailKey,
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Please Type Description';
+                                  }
+                                },
+                                maxLines: 15,
+                                controller: detailController,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Topic Details',
+                                  hintStyle: TextStyle(
+                                      color: ColorClass().black38,
+                                      decoration: TextDecoration.none),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      EdgeInsets.only(left: 80, right: 80, top: 15, bottom: 5),
+                  child: Buttons(
+                      height: 50,
+                      boxDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                ColorClass().themeColor2,
+                                ColorClass().themeColor,
+                              ])),
+                      onPress: () {
                         if (topicKey.currentState!.validate() &&
                             detailKey.currentState!.validate()) {
                           setState(() {
@@ -206,15 +146,32 @@ class _PostScreenState extends State<PostScreen> {
 
                           String id =
                               DateTime.now().microsecondsSinceEpoch.toString();
+                          posts.child(id).update({
+                            'title': titleController.text,
+                            'id': id,
+                            'detail': detailController.text,
+                          }).then((value) {
+                            toast().toastMessage('Posted', Colors.blue);
+                            setState(() {
+                              loading = false;
+                              titleController.clear();
+                              detailController.clear();
+                            });
+                          }).onError((error, stackTrace) {
+                            toast().toastMessage(error.toString(), Colors.red);
+                            setState(() {
+                              loading = false;
+                            });
+                          });
 
-                          userDraft.child('draft').set({
+                          userPosts.child('posts').update({
                             id: {
                               'title': titleController.text,
                               'id': id,
                               'detail': detailController.text,
                             }
                           }).then((value) {
-                            toast().toastMessage('Drafted', Colors.blue);
+                            toast().toastMessage('Posted', Colors.blue);
                             setState(() {
                               loading = false;
                               titleController.clear();
@@ -230,36 +187,78 @@ class _PostScreenState extends State<PostScreen> {
                           return toast().toastMessage('Error', Colors.red);
                         }
                       },
-                      child: Text(
-                        'Save to draft',
-                        style: TextStyle(
-                            color: ColorClass().themeColor2,
-                            decoration: TextDecoration.underline),
-                      )),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Checkbox(
-                        activeColor: ColorClass().themeColor2,
-                        value: checkBoxValue,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (checkBoxValue == true) {}
-                            checkBoxValue = value!;
-                          });
+                      child: Text('Post')),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    TextButton(
+                        onPressed: () {
+                          if (topicKey.currentState!.validate() &&
+                              detailKey.currentState!.validate()) {
+                            setState(() {
+                              loading = true;
+                            });
+
+                            String id = DateTime.now()
+                                .microsecondsSinceEpoch
+                                .toString();
+
+                            userDraft.child('draft').set({
+                              id: {
+                                'title': titleController.text,
+                                'id': id,
+                                'detail': detailController.text,
+                              }
+                            }).then((value) {
+                              toast().toastMessage('Drafted', Colors.blue);
+                              setState(() {
+                                loading = false;
+                                titleController.clear();
+                                detailController.clear();
+                              });
+                            }).onError((error, stackTrace) {
+                              toast()
+                                  .toastMessage(error.toString(), Colors.red);
+                              setState(() {
+                                loading = false;
+                              });
+                            });
+                          } else {
+                            return toast().toastMessage('Error', Colors.red);
+                          }
                         },
-                      ),
-                      Text(
-                        'Turn off Reactions',
-                        style: TextStyle(
-                            color: ColorClass().themeColor2,
-                            decoration: TextDecoration.underline),
-                      ),
-                    ],
-                  )
-                ],
-              )
-            ],
+                        child: Text(
+                          'Save to draft',
+                          style: TextStyle(
+                              color: ColorClass().themeColor2,
+                              decoration: TextDecoration.underline),
+                        )),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Checkbox(
+                          activeColor: ColorClass().themeColor2,
+                          value: checkBoxValue,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              if (checkBoxValue == true) {}
+                              checkBoxValue = value!;
+                            });
+                          },
+                        ),
+                        Text(
+                          'Turn off Reactions',
+                          style: TextStyle(
+                              color: ColorClass().themeColor2,
+                              decoration: TextDecoration.underline),
+                        ),
+                      ],
+                    )
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),

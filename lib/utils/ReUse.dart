@@ -167,7 +167,7 @@ class MyWidget extends StatelessWidget {
         height: 40,
         width: MediaQuery.of(context).size.width / 3.2,
         decoration: BoxDecoration(
-          color: isFavourte ? ColorClass().themeColor2 : Colors.teal.shade100,
+          color: isFavourte ? ColorClass().themeColor2 : Colors.transparent,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(15),
             bottomRight: Radius.circular(15),
@@ -185,108 +185,6 @@ class MyWidget extends StatelessWidget {
 }
 
 /////////////////////////////////////////////////////////////////////
-class ButtonList2 extends StatefulWidget {
-  ButtonList2({
-    Key? key,
-    required this.buttons,
-  }) : super(key: key);
-
-  final List<Button2> buttons;
-
-  @override
-  State<ButtonList2> createState() => _ButtonList2State();
-}
-
-class _ButtonList2State extends State<ButtonList2> {
-  late List<bool> favoriateState;
-
-  @override
-  void initState() {
-    favoriateState = List.generate(
-        widget.buttons.length, (index) => widget.buttons[index].isFavorite);
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        for (var i = 0; i < widget.buttons.length; i++)
-          Widget2(
-            text1: widget.buttons[i].text,
-            onPressed: () {
-              for (var j = 0; j < favoriateState.length; j++) {
-                favoriateState[j] = false;
-              }
-              setState(() {
-                favoriateState[i] = true;
-                if (widget.buttons[i].onPressed != null) {
-                  widget.buttons[i].onPressed!();
-                }
-              });
-            },
-            isFavourte: favoriateState[i],
-            width: MediaQuery.of(context).size.width,
-            height: 55,
-          ),
-      ],
-    );
-  }
-}
-
-class Button2 {
-  final String text;
-  final Function()? onPressed;
-  final bool isFavorite;
-
-  Button2({required this.text, this.onPressed, this.isFavorite = false});
-}
-
-class Widget2 extends StatelessWidget {
-  const Widget2(
-      {Key? key,
-      required this.text1,
-      required this.onPressed,
-      required this.width,
-      required this.height,
-      this.isFavourte = false})
-      : super(key: key);
-
-  final String text1;
-  final Function()? onPressed;
-  final bool isFavourte;
-  final double width;
-  final double height;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Padding(
-        padding: const EdgeInsets.all(0.3),
-        child: Container(
-          height: height,
-          width: width,
-          decoration: BoxDecoration(
-              color:
-                  isFavourte ? ColorClass().themeColor2 : ColorClass().black12,
-              borderRadius: BorderRadius.circular(17)),
-          child: Align(
-            alignment: Alignment.center,
-            child: Text(
-              text1,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: ColorClass().black,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 SaveUserData(String email, String name, String Number) {
   String id = FirebaseAuth.instance.currentUser!.email.toString();
@@ -297,20 +195,6 @@ SaveUserData(String email, String name, String Number) {
   }).then((value) {
     print(id);
   }).onError((error, stackTrace) {});
-}
-
-class RelatedPosts {
-  final String title;
-
-  const RelatedPosts({
-    required this.title,
-  });
-
-  factory RelatedPosts.fromMap(Map<dynamic, dynamic> map) {
-    return RelatedPosts(
-      title: map['name'] ?? '',
-    );
-  }
 }
 
 class facebook {
@@ -326,43 +210,6 @@ class facebook {
     } catch (error) {
       print(error);
     }
-  }
-}
-
-class ShowGuide extends StatelessWidget {
-  const ShowGuide({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorClass().black,
-      body: Container(
-        child: Center(
-          child: Container(
-            height: 400,
-            width: 300,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: ColorClass().white),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Image(image: AssetImage('assets/images/Rectangle.png')),
-                  Text(
-                    'Swipe down to see next post \nSwipe right to like  post \nSwipe left to dislike post',
-                    style: TextStyle(
-                        color: ColorClass().themeColor2,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 20),
-                  )
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 

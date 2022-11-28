@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thought_bin/Home/AddPostScreen.dart';
+import 'package:thought_bin/Promise/RelatedPost.dart';
 import 'package:thought_bin/userProfile/Profile.dart';
-import 'package:thought_bin/Home/UploadPostScreen.dart';
 import '../utils/ReUse.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,8 +11,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+
   final page = [
-    UploadPostScreen(),
+    RelatedPostFind(),
     PostScreen(),
     ProfileScreen(),
   ];

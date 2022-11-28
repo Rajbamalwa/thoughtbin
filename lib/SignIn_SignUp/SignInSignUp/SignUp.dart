@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:thought_bin/Home/HomePage.dart';
 import '../../Promise/Promise.dart';
 import '../../utils/ReUse.dart';
-import 'SignIn.dart';
-import 'google_signin.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -19,29 +16,31 @@ class _SignUpState extends State<SignUp> {
   final formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  final bool _isChecked = false;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-  }
-
-  final user = FirebaseDatabase.instance.ref('user');
+  final authFirebase = FirebaseAuth.instance;
 
   void signUp() {
-    _auth
+    FirebaseAuth.instance
         .createUserWithEmailAndPassword(
             email: emailController.text.toString(),
             password: passwordController.text.toString())
-        .then((value) {
-      toast().toastMessage(
-          'Your Account was Successfully Created now go and login',
-          Colors.blue);
+        .then((value) async {
+      toast()
+          .toastMessage('Your Account was Successfully Created', Colors.blue);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => PromiseScreen()));
+      final credential = EmailAuthProvider.credential(
+          email: emailController.text, password: passwordController.text);
+      final auth = await authFirebase.signInWithCredential(credential);
+      if (auth.additionalUserInfo!.isNewUser) {
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const PromiseScreen()));
+        emailController.clear();
+        passwordController.clear();
+      } else {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => HomePage()));
+      }
       setState(() {
         loading = false;
       });
@@ -55,12 +54,6 @@ class _SignUpState extends State<SignUp> {
       setState(() {
         loading = false;
       });
-    });
-  }
-
-  Future addUserDetails(String email) async {
-    await FirebaseFirestore.instance.collection('users').add({
-      'email': email,
     });
   }
 

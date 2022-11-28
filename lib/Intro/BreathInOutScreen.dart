@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:thought_bin/Home/HomePage.dart';
 import 'package:thought_bin/Intro/IntroScreen.dart';
 import 'package:thought_bin/Promise/RelatedPost.dart';
 import 'package:thought_bin/utils/ReUse.dart';
@@ -46,10 +47,11 @@ class _BreathInOutState extends State<BreathInOut> {
                           MaterialPageRoute(
                               builder: (context) => IntroScreenWidgets()));
                     } else {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RelatedPostFind()));
+                      toast().toastMessage(
+                          'Welcome Back, Please type a topic and select it',
+                          ColorClass().blue);
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) => HomePage()));
                     }
                   },
                   child: Text(

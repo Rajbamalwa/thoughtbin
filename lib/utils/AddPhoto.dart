@@ -1,91 +1,187 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/material.dart';
 import 'package:thought_bin/utils/ReUse.dart';
 
 class AddPhoto extends StatefulWidget {
   const AddPhoto({Key? key}) : super(key: key);
 
   @override
-  _AddPhotoState createState() => _AddPhotoState();
+  State<AddPhoto> createState() => _AddPhotoState();
 }
 
 class _AddPhotoState extends State<AddPhoto> {
-  double screenHeight = 0;
-  double screenWidth = 0;
-  Color primary = const Color(0xffeef444c);
-  String profilePicLink = "";
+  bool loading = false;
+  File? _image;
+  File? _background;
+  final picker = ImagePicker();
 
-  void pickUploadProfilePic() async {
-    final image = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      maxHeight: 512,
-      maxWidth: 512,
-      imageQuality: 90,
-    );
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
 
-    Reference ref = FirebaseStorage.instance.ref().child("profilepic.jpg");
+  final userPosts =
+      FirebaseDatabase.instance.ref(FirebaseAuth.instance.currentUser!.uid);
 
-    await ref.putFile(File(image!.path));
-
-    ref.getDownloadURL().then((value) async {
-      setState(() {
-        profilePicLink = value;
-      });
+  Future getImageGallery() async {
+    final pickedFile =
+        await picker.getImage(source: ImageSource.gallery, imageQuality: 80);
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        Container(
+          color: ColorClass().red,
+        );
+      }
     });
+  }
+
+  Future<String> files() async {
+    String download = await storage
+        .ref('${FirebaseAuth.instance.currentUser!.uid}/ProfilePic')
+        .getDownloadURL();
+    return download;
+  }
+
+  Future getBackGroundImage() async {
+    final pickedFile =
+        await picker.getImage(source: ImageSource.gallery, imageQuality: 80);
+    setState(() {
+      if (pickedFile != null) {
+        _background = File(pickedFile.path);
+      } else {
+        Container(
+          color: ColorClass().red,
+        );
+      }
+    });
+  }
+
+  Future<String> backgroundImage() async {
+    String download = await storage
+        .ref('${FirebaseAuth.instance.currentUser!.uid}/backgroundImage')
+        .getDownloadURL();
+    return download;
   }
 
   @override
   Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    screenWidth = MediaQuery.of(context).size.width;
+    String image = "";
+    String background = '';
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () {
-                pickUploadProfilePic();
-              },
-              child: Container(
-                margin: const EdgeInsets.only(top: 80, bottom: 24),
-                height: 120,
-                width: 120,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: primary,
-                ),
-                child: Center(
-                  child: profilePicLink == ""
-                      ? const Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 80,
-                        )
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.network(profilePicLink),
-                        ),
-                ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                  padding: EdgeInsets.all(50),
+                  child: Container(
+                    child: _image != null
+                        ? Image.file(_image!.absolute)
+                        : Center(child: Icon(Icons.image)),
+                  )),
+              Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15),
+                child: Buttons(
+                    onPress: getImageGallery,
+                    child: Text('Get Profile Image'),
+                    height: 50,
+                    boxDecoration: BoxDecoration(
+                        color: ColorClass().themeColor2,
+                        borderRadius: BorderRadius.circular(10))),
               ),
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  FirebaseAuth.instance.currentUser
-                      ?.updatePhotoURL(profilePicLink)
-                      .then((value) {
-                    toast().toastMessage('Profile Set', ColorClass().blue);
-                  }).onError((error, stackTrace) {
-                    toast().toastMessage(error.toString(), ColorClass().red);
-                  });
-                },
-                child: const Text('Set Profile photo'))
-          ],
+              Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                child: Buttons(
+                    loading: loading,
+                    child: Text('Set Profile Image'),
+                    height: 50,
+                    boxDecoration: BoxDecoration(
+                        color: ColorClass().themeColor2,
+                        borderRadius: BorderRadius.circular(10)),
+                    onPress: () async {
+                      setState(() {
+                        loading = true;
+                      });
+                      firebase_storage.Reference ref =
+                          firebase_storage.FirebaseStorage.instance.ref(
+                              '/${FirebaseAuth.instance.currentUser!.uid}/ProfilePic');
+                      firebase_storage.UploadTask uploadTask =
+                          ref.putFile(_image!.absolute);
+
+                      Future.value(uploadTask).then((value) async {
+                        var newUrl = await ref.getDownloadURL();
+                        userPosts.child('Images').set({
+                          'id': FirebaseAuth.instance.currentUser!.uid,
+                          'Image': newUrl.toString()
+                        }).whenComplete(() {
+                          setState(() {
+                            loading = false;
+                          });
+                          toast().toastMessage(
+                              'Set Profile picture', ColorClass().blue);
+                        }).onError((error, stackTrace) {
+                          print(error.toString());
+                          setState(() {
+                            loading = false;
+                          });
+                        });
+                      }).onError((error, stackTrace) {
+                        toast()
+                            .toastMessage(error.toString(), ColorClass().red);
+                        setState(() {
+                          loading = false;
+                        });
+                      });
+                    }),
+              ),
+              Padding(
+                  padding: EdgeInsets.all(50),
+                  child: Container(
+                    child: _background != null
+                        ? Image.file(_background!.absolute)
+                        : Center(child: Icon(Icons.image)),
+                  )),
+              Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15),
+                child: Buttons(
+                    onPress: getBackGroundImage,
+                    child: Text('Get Background Image'),
+                    height: 50,
+                    boxDecoration: BoxDecoration(
+                        color: ColorClass().themeColor2,
+                        borderRadius: BorderRadius.circular(10))),
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+                  child: Buttons(
+                      loading: loading,
+                      child: Text('Set Background Image'),
+                      height: 50,
+                      boxDecoration: BoxDecoration(
+                          color: ColorClass().themeColor2,
+                          borderRadius: BorderRadius.circular(10)),
+                      onPress: () async {
+                        setState(() {
+                          loading = true;
+                        });
+                        firebase_storage.Reference ref =
+                            firebase_storage.FirebaseStorage.instance.ref(
+                                '/${FirebaseAuth.instance.currentUser!.uid}/backgroundImage');
+                        firebase_storage.UploadTask uploadTask =
+                            ref.putFile(_background!.absolute);
+                        setState(() {
+                          loading = false;
+                        });
+                        toast().toastMessage(
+                            'set your Profile background', ColorClass().blue);
+                      })),
+            ],
+          ),
         ),
       ),
     );

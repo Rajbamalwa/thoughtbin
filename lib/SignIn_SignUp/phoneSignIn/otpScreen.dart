@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thought_bin/Home/HomePage.dart';
+import 'package:thought_bin/userProfile/Account.dart';
 import '../../utils/ReUse.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
@@ -50,7 +50,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                       ?.updatePhoneNumber(crenditial);
 
                   Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => HomePage()));
+                      MaterialPageRoute(builder: (context) => AccountScreen()));
                 } catch (e) {
                   setState(() {
                     loading = false;

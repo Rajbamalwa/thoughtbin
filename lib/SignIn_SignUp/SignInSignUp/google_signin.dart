@@ -1,10 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:thought_bin/Home/HomePage.dart';
 import 'package:thought_bin/utils/ReUse.dart';
-
 import '../../Promise/Promise.dart';
-import '../../Promise/RelatedPost.dart';
 
 final authFirebase = FirebaseAuth.instance;
 Future<void> googleSignIn(context) async {
@@ -19,19 +18,13 @@ Future<void> googleSignIn(context) async {
               idToken: googleAuth.idToken, accessToken: googleAuth.accessToken),
         );
 
-        AuthCredential credential = GoogleAuthProvider.credential(
-            accessToken: googleAuth.accessToken, idToken: googleAuth.idToken);
-        UserCredential userCred =
-            await authFirebase.signInWithCredential(credential);
-        bool? isNewUser = userCred.additionalUserInfo?.isNewUser;
-
-        toast().toastMessage(authResult.user!.email.toString(), Colors.blue);
-        if (isNewUser == true) {
+        if (authResult.additionalUserInfo!.isNewUser) {
           Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const PromiseScreen()));
         } else {
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const RelatedPostFind()));
+          toast().toastMessage('Welcome back', ColorClass().themeColor2);
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => HomePage()));
         }
 
         SaveUserData(

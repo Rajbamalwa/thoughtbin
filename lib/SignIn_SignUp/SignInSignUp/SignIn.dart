@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:thought_bin/Promise/Promise.dart';
-import 'package:thought_bin/Promise/RelatedPost.dart';
+import 'package:thought_bin/Home/HomePage.dart';
 import 'package:thought_bin/SignIn_SignUp/SignInSignUp/SignUp.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:thought_bin/SignIn_SignUp/phoneSignIn/passwordReset.dart';
@@ -28,20 +27,9 @@ class _SignInState extends State<SignIn> {
         .signInWithEmailAndPassword(
             email: emailController.text,
             password: passwordController.text.toString())
-        .then((value) async {
-      AuthCredential credential = EmailAuthProvider.credential(
-          email: emailController.text, password: passwordController.text);
-      UserCredential userCred = await _auth.signInWithCredential(credential);
-      bool? isNewUser = userCred.additionalUserInfo?.isNewUser;
-
-      toast().toastMessage(value.user!.email.toString(), Colors.blue);
-      if (isNewUser == true) {
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => PromiseScreen()));
-      } else {
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => RelatedPostFind()));
-      }
+        .then((value) {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => HomePage()));
       setState(() {
         loading = false;
       });

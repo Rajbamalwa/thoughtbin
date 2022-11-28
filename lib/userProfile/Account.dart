@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:thought_bin/utils/ReUse.dart';
-import 'package:thought_bin/SignIn_SignUp/SignInSignUp/SignUp.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:thought_bin/SignIn_SignUp/phoneSignIn/passwordReset.dart';
 import 'package:thought_bin/SignIn_SignUp/phoneSignIn/setMobileNumber.dart';
 import 'package:thought_bin/utils/AddPhoto.dart';
@@ -17,8 +17,22 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  final userPosts = FirebaseDatabase.instance
+      .ref('${FirebaseAuth.instance.currentUser!.uid.toString()}/Images');
   final auth = FirebaseAuth.instance;
   final userNameController = TextEditingController();
+  firebase_storage.FirebaseStorage storage =
+      firebase_storage.FirebaseStorage.instance;
+
+  Future<String> files() async {
+    String download = await storage
+        .ref('${FirebaseAuth.instance.currentUser!.uid}/ProfilePic')
+        .getDownloadURL();
+    return download;
+  }
+
+  final delete = FirebaseDatabase.instance
+      .ref('${FirebaseAuth.instance.currentUser!.uid.toString()}');
   @override
   Widget build(BuildContext context) {
     String image = "";
@@ -28,6 +42,9 @@ class _AccountScreenState extends State<AccountScreen> {
         backgroundColor: ColorClass().white,
         elevation: 0.0,
         leading: IconButton(
+          splashRadius: 0.1,
+          splashColor: ColorClass().themeColor2,
+          highlightColor: ColorClass().themeColor2,
           onPressed: () {
             Navigator.pop(context);
           },
@@ -49,9 +66,6 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(
-              height: 30,
-            ),
             Stack(
               children: [
                 Padding(
@@ -63,26 +77,59 @@ class _AccountScreenState extends State<AccountScreen> {
                       child: Container(
                         height: 120,
                         decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: ColorClass().black12),
-                            gradient: LinearGradient(
-                                colors: [
-                                  ColorClass().themeColor2,
-                                  ColorClass().themeColor
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter)),
+                          shape: BoxShape.circle,
+                          border:
+                              Border.all(color: ColorClass().white, width: 2),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(3.0),
                           child: Container(
-                            height: 120,
-                            width: 120,
+                            height: 140,
+                            width: 140,
                             decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(
-                                        '${FirebaseAuth.instance.currentUser?.photoURL}'))),
+                              shape: BoxShape.circle,
+                            ),
+                            child: image == ''
+                                ? Container(
+                                    decoration:
+                                        BoxDecoration(shape: BoxShape.circle),
+                                    child: FutureBuilder(
+                                        future: files(),
+                                        builder: (BuildContext context,
+                                            AsyncSnapshot<String> snapshot) {
+                                          if (snapshot.connectionState ==
+                                                  ConnectionState.done &&
+                                              snapshot.hasData) {
+                                            return Container(
+                                              height: 140,
+                                              width: 140,
+                                              decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(
+                                                      snapshot.data!,
+                                                    ),
+                                                    fit: BoxFit.cover,
+                                                  )),
+                                            );
+                                          }
+                                          if (snapshot.connectionState ==
+                                                  ConnectionState.waiting &&
+                                              !snapshot.hasData) {
+                                            return Container(
+                                              child: Center(
+                                                  child:
+                                                      CircularProgressIndicator()),
+                                            );
+                                          }
+                                          return Container(
+                                            child: Image(
+                                                image: AssetImage(
+                                                    'assets/images/eye.png')),
+                                          );
+                                        }),
+                                  )
+                                : Center(child: Icon(Icons.image)),
                           ),
                         ),
                       ),
@@ -93,13 +140,16 @@ class _AccountScreenState extends State<AccountScreen> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(60, 30, 0, 0),
                     child: Container(
-                      height: 30,
+                      height: 40,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: ColorClass().white,
-                      ),
+                          shape: BoxShape.circle,
+                          color: ColorClass().white,
+                          border: Border.all(color: ColorClass().black12)),
                       child: Center(
                         child: IconButton(
+                            splashRadius: 0.1,
+                            splashColor: ColorClass().themeColor2,
+                            highlightColor: ColorClass().themeColor2,
                             onPressed: () {
                               Navigator.push(
                                   context,
@@ -108,7 +158,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             },
                             icon: Icon(
                               Icons.edit,
-                              color: ColorClass().themeColor2,
+                              color: ColorClass().black,
                             )),
                       ),
                     ),
@@ -119,16 +169,16 @@ class _AccountScreenState extends State<AccountScreen> {
             const SizedBox(height: 30),
             AccountWidget(
               text:
-                  'Name: ${FirebaseAuth.instance.currentUser!.displayName.toString()}',
+                  ' ${FirebaseAuth.instance.currentUser!.displayName.toString()}',
               onPress: () {
                 showMyDialog(userNameController.text.toString());
               },
             ),
             AccountWidget(
-                text: 'Email: ${FirebaseAuth.instance.currentUser!.email}',
+                text: ' ${FirebaseAuth.instance.currentUser!.email}',
                 onPress: () {}),
             AccountWidget(
-              text: 'Change Password',
+              text: ' Change Password',
               onPress: () {
                 Navigator.push(
                     context,
@@ -137,7 +187,8 @@ class _AccountScreenState extends State<AccountScreen> {
               },
             ),
             AccountWidget(
-              text: 'No.:  ${FirebaseAuth.instance.currentUser?.phoneNumber}',
+              text:
+                  'Number : ${FirebaseAuth.instance.currentUser?.phoneNumber}',
               onPress: () {
                 Navigator.push(
                     context,
@@ -146,21 +197,13 @@ class _AccountScreenState extends State<AccountScreen> {
               },
             ),
             AccountWidget(
-              text: 'Add another Account',
-              onPress: () {
-                toast().toastMessage(
-                    'Apologies for the fact that you can not add more then 1 account now , Our team is working hard on it so you can add multiple account soon',
-                    ColorClass().red);
-              },
-            ),
-            AccountWidget(
-              text: 'Delete Account',
+              text: ' Delete Account',
               onPress: () {
                 deleteAcc();
               },
             ),
             AccountWidget(
-              text: 'Language',
+              text: ' Language',
               onPress: () {
                 toast().toastMessage(
                     'Apologies for the fact that we are showing you in only one language, we will bring more languages for you very soon.',
@@ -182,7 +225,10 @@ class _AccountScreenState extends State<AccountScreen> {
                 boxDecoration: BoxDecoration(
                     color: ColorClass().themeColor2,
                     borderRadius: BorderRadius.circular(10)),
-                child: const Text('Sign Out'),
+                child: Text(
+                  'Sign Out',
+                  style: TextStyle(color: ColorClass().white, fontSize: 20),
+                ),
               ),
             )
           ],
@@ -196,16 +242,23 @@ class _AccountScreenState extends State<AccountScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Update'),
-            content: Text('Do you want to delete your account?'),
+            title: const Text('Do you want to delete your account?'),
             actions: [
               Buttons(
                   onPress: () async {
-                    FirebaseAuth.instance.currentUser?.delete().then((value) {
+                    FirebaseAuth.instance.currentUser
+                        ?.delete()
+                        .whenComplete(() async {
                       toast().toastMessage(
                           'Your account was successfully deleted',
                           ColorClass().blue);
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.pushReplacement(
+                          context, MaterialPageRoute(builder: (_) => SignIn()));
                     });
+                    delete
+                        .child(FirebaseAuth.instance.currentUser!.uid)
+                        .remove();
                     await FirebaseAuth.instance.signOut();
                     Navigator.pushReplacement(
                         context, MaterialPageRoute(builder: (_) => SignIn()));
@@ -239,16 +292,43 @@ class _AccountScreenState extends State<AccountScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Update'),
+            elevation: 30,
             content: Container(
+              height: 150,
               decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(20)),
-              child: TextField(
-                controller: userNameController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(2)))),
+                  BoxDecoration(borderRadius: BorderRadius.circular(70)),
+              child: Column(
+                children: [
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Add Username',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        IconButton(
+                          splashRadius: 0.1,
+                          splashColor: ColorClass().themeColor2,
+                          highlightColor: ColorClass().themeColor2,
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(Icons.clear),
+                          color: ColorClass().red,
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextField(
+                    controller: userNameController,
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10)))),
+                  ),
+                ],
               ),
             ),
             actions: [
@@ -270,7 +350,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         .update({
                       'Name': userNameController.text.toString(),
                     }).then((value) {
-                      toast().toastMessage('Posted', Colors.blue);
+                      toast().toastMessage('Username Set', Colors.blue);
                     }).onError((error, stackTrace) {
                       toast().toastMessage(error.toString(), Colors.red);
                     });
@@ -290,7 +370,7 @@ class AccountWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
+      padding: const EdgeInsets.fromLTRB(20, 1, 20, 1),
       child: Container(
         height: 55,
         decoration: BoxDecoration(
@@ -304,6 +384,7 @@ class AccountWidget extends StatelessWidget {
               padding: const EdgeInsets.all(10.0),
               child: Text(
                 text,
+                overflow: TextOverflow.fade,
                 style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 17,
@@ -317,6 +398,9 @@ class AccountWidget extends StatelessWidget {
                     shape: BoxShape.circle, color: ColorClass().white),
                 child: Center(
                   child: IconButton(
+                      splashRadius: 0.1,
+                      splashColor: ColorClass().themeColor2,
+                      highlightColor: ColorClass().themeColor2,
                       onPressed: onPress,
                       icon: Icon(
                         Icons.mode_edit_outlined,

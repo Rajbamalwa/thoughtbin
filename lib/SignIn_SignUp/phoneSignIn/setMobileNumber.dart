@@ -15,6 +15,7 @@ class _SetMobileNoState extends State<SetMobileNo> {
   bool loading = false;
   final phoneNumberController = TextEditingController();
   final auth = FirebaseAuth.instance;
+  final formKey = GlobalKey<FormState>();
 
   Future addUserDetails(int Number) async {
     await FirebaseFirestore.instance.collection('users').add({
@@ -26,87 +27,124 @@ class _SetMobileNoState extends State<SetMobileNo> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.only(left: 20, right: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(
-              height: 80,
+            Padding(
+              padding: const EdgeInsets.only(right: 30),
+              child: Form(
+                key: formKey,
+                child: TextFormField(
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please Enter Phone Number';
+                    }
+                  },
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  controller: phoneNumberController,
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.call),
+                      hintText: '+918765432198',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                ),
+              ),
             ),
-            TextFormField(
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              controller: phoneNumberController,
-              decoration: InputDecoration(
-                  icon: Icon(Icons.call),
-                  hintText: '+918765432198',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10))),
-            ),
-            const SizedBox(
-              height: 80,
-            ),
-            Buttons(
-              onPress: () {
-                setState(() {
-                  loading = true;
-                });
-                auth.verifyPhoneNumber(
-                    phoneNumber: phoneNumberController.text,
-                    verificationCompleted: (_) {
-                      setState(() {
-                        loading = true;
-                      });
-                      auth.verifyPhoneNumber(
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 20),
+              child: Buttons(
+                onPress: () {
+                  setState(() {
+                    loading = true;
+                  });
+                  if (formKey.currentState!.validate()) {
+                    auth.verifyPhoneNumber(
                         phoneNumber: phoneNumberController.text,
-                        verificationCompleted: (_) {},
+                        verificationCompleted: (_) {
+                          setState(() {
+                            loading = true;
+                          });
+                          auth.verifyPhoneNumber(
+                            phoneNumber: phoneNumberController.text,
+                            verificationCompleted: (_) {},
+                            verificationFailed: (e) {
+                              toast()
+                                  .toastMessage(e.toString(), ColorClass().red);
+                            },
+                            codeSent: (String verificationId, int? token) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VerifyCodeScreen(
+                                      verificationId: verificationId),
+                                ),
+                              );
+                            },
+                            codeAutoRetrievalTimeout: (e) {
+                              toast()
+                                  .toastMessage(e.toString(), ColorClass().red);
+                            },
+                          );
+                        },
                         verificationFailed: (e) {
-                          toast().toastMessage(e.toString(), ColorClass().red);
+                          setState(() {
+                            loading = false;
+                          });
+                          toast().toastMessage(e.toString(), ColorClass().blue);
                         },
                         codeSent: (String verificationId, int? token) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VerifyCodeScreen(
-                                  verificationId: verificationId),
-                            ),
-                          );
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => VerifyCodeScreen(
+                                        verificationId: verificationId,
+                                      )));
+                          setState(() {
+                            loading = false;
+                          });
                         },
                         codeAutoRetrievalTimeout: (e) {
                           toast().toastMessage(e.toString(), ColorClass().red);
-                        },
-                      );
+                          setState(() {
+                            loading = false;
+                          });
+                        });
+                    addUserDetails(int.parse(phoneNumberController.text));
+                  } else {
+                    toast().toastMessage(
+                        'Please Enter Valid Phone number', ColorClass().red);
+                  }
+                },
+                height: 50,
+                boxDecoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFF13A6A7), Color(0xFF00D3A1)]),
+                    borderRadius: BorderRadius.circular(10)),
+                child: const Text('Login'),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 10, bottom: 30, left: 10, right: 20),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: FloatingActionButton(
+                    elevation: 0.0,
+                    tooltip: 'Back',
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
+                    backgroundColor: ColorClass().themeColor2,
+                    splashColor: ColorClass().themeColor2,
+                    onPressed: () {
+                      Navigator.pop(context);
                     },
-                    verificationFailed: (e) {
-                      setState(() {
-                        loading = false;
-                      });
-                      toast().toastMessage(e.toString(), ColorClass().blue);
-                    },
-                    codeSent: (String verificationId, int? token) {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => VerifyCodeScreen(
-                                    verificationId: verificationId,
-                                  )));
-                      setState(() {
-                        loading = false;
-                      });
-                    },
-                    codeAutoRetrievalTimeout: (e) {
-                      toast().toastMessage(e.toString(), ColorClass().red);
-                      setState(() {
-                        loading = false;
-                      });
-                    });
-                addUserDetails(int.parse(phoneNumberController.text));
-              },
-              height: 50,
-              boxDecoration: BoxDecoration(
-                  color: ColorClass().themeColor2,
-                  borderRadius: BorderRadius.circular(10)),
-              child: const Text('Login'),
-            )
+                    child: Icon(Icons.keyboard_backspace_outlined,
+                        color: ColorClass().black)),
+              ),
+            ),
           ],
         ),
       ),
