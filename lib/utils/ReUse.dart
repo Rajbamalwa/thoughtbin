@@ -281,3 +281,22 @@ class facebookButton extends StatelessWidget {
     );
   }
 }
+
+class NoData1 extends StatelessWidget {
+  const NoData1({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            "I think you search wrong\n keyword or you didn't\n select the keyword",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -188,7 +188,7 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
             AccountWidget(
               text:
-                  'Number : ${FirebaseAuth.instance.currentUser?.phoneNumber}',
+                  ' Number : ${FirebaseAuth.instance.currentUser?.phoneNumber}',
               onPress: () {
                 Navigator.push(
                     context,
@@ -382,13 +382,18 @@ class AccountWidget extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(10.0),
-              child: Text(
-                text,
-                overflow: TextOverflow.fade,
-                style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 17,
-                    color: ColorClass().black54),
+              child: SizedBox(
+                width: 200.0,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                    style: TextStyle(color: ColorClass().black, fontSize: 15.0),
+                  ),
+                ),
               ),
             ),
             Padding(

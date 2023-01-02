@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:thought_bin/Home/ShowSearchPost.dart';
 import 'package:thought_bin/userProfile/Account.dart';
 import '../utils/ReUse.dart';
 import 'package:readmore/readmore.dart';
@@ -19,7 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool loading = false;
 
   final draft = FirebaseDatabase.instance
-      .ref('${FirebaseAuth.instance.currentUser!.uid.toString()}/draft');
+      .ref('${FirebaseAuth.instance.currentUser!.uid.toString()}/Drafted');
   final saved = FirebaseDatabase.instance
       .ref('${FirebaseAuth.instance.currentUser!.uid.toString()}/saved');
   final posts = FirebaseDatabase.instance.ref('posts');
@@ -59,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: const EdgeInsets.fromLTRB(10, 40, 10, 0),
                 child: SizedBox(
                   height: 100,
-                  width: MediaQuery.of(context).size.width,
+                  width: double.infinity,
                   child: background == ''
                       ? FutureBuilder(
                           future: backgroundImage(),
@@ -85,7 +86,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ConnectionState.waiting &&
                                 !snapshot.hasData) {
                               return Container(
-                                child: CircularProgressIndicator(),
+                                padding: EdgeInsets.only(top: 40),
+                                child:
+                                    Center(child: CircularProgressIndicator()),
                               );
                             }
                             return Container(
@@ -294,6 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             .child('title')
                                             .value
                                             .toString(),
+                                        overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                             color: Colors.black,
                                             fontSize: 20,
@@ -356,8 +360,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                         )));
-                  } else if (title.toLowerCase().contains(
-                      searchController.text.toLowerCase().toLowerCase())) {
+                  } else if (title
+                      .toLowerCase()
+                      .contains(searchController.text.toLowerCase())) {
                     return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Center(
@@ -376,7 +381,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
-                                        snapshot.child(title).value.toString(),
+                                        title,
+                                        overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                             color: Colors.black,
                                             fontSize: 20,
@@ -450,167 +456,210 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     final id = snapshot.child('id').value.toString();
                     final detail = snapshot.child('detail').value.toString();
                     if (searchController.text.isEmpty) {
-                      return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                              child: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.black12,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          snapshot
-                                              .child('title')
-                                              .value
-                                              .toString(),
-                                          style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w400),
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ShowSearchPost(
+                                        title: snapshot
+                                            .child('title')
+                                            .value
+                                            .toString(),
+                                        detail: snapshot
+                                            .child('detail')
+                                            .value
+                                            .toString(),
+                                      )));
+                        },
+                        child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                                child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.black12,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            snapshot
+                                                .child('title')
+                                                .value
+                                                .toString(),
+                                            style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w400),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    IconButton(
-                                        onPressed: () {
-                                          userPosts
-                                              .child(snapshot
-                                                  .child('id')
-                                                  .value
-                                                  .toString())
-                                              .remove()
-                                              .then((value) {
-                                            toast().toastMessage('Post Deleted',
-                                                ColorClass().red);
-                                          });
-                                          posts
-                                              .child(snapshot
-                                                  .child('id')
-                                                  .value
-                                                  .toString())
-                                              .remove()
-                                              .then((value) {
-                                            toast().toastMessage('Post Deleted',
-                                                ColorClass().red);
-                                          });
-                                        },
-                                        icon: const Icon(Icons.delete)),
-                                  ],
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Divider(
-                                    height: 4,
-                                    thickness: 2,
+                                      IconButton(
+                                          onPressed: () {
+                                            userPosts
+                                                .child(snapshot
+                                                    .child('id')
+                                                    .value
+                                                    .toString())
+                                                .remove()
+                                                .then((value) {
+                                              toast().toastMessage(
+                                                  'Post Deleted',
+                                                  ColorClass().red);
+                                            });
+                                            posts
+                                                .child(snapshot
+                                                    .child('id')
+                                                    .value
+                                                    .toString())
+                                                .remove()
+                                                .then((value) {
+                                              toast().toastMessage(
+                                                  'Post Deleted',
+                                                  ColorClass().red);
+                                            });
+                                          },
+                                          icon: const Icon(Icons.delete)),
+                                    ],
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: ReadMoreText(
-                                      snapshot.child('detail').value.toString(),
-                                      style:
-                                          const TextStyle(color: Colors.black),
-                                      trimLines: 3,
-                                      trimMode: TrimMode.Line,
-                                      trimCollapsedText: 'Show more',
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Divider(
+                                      height: 4,
+                                      thickness: 2,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )));
-                    } else if (title.toLowerCase().contains(
-                        searchController.text.toLowerCase().toLowerCase())) {
-                      return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                              child: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.black12,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          snapshot
-                                              .child(title)
-                                              .value
-                                              .toString(),
-                                          style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w400),
-                                        ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: ReadMoreText(
+                                        snapshot
+                                            .child('detail')
+                                            .value
+                                            .toString(),
+                                        style: const TextStyle(
+                                            color: Colors.black),
+                                        trimLines: 3,
+                                        trimMode: TrimMode.Line,
+                                        trimCollapsedText: 'Show more',
                                       ),
                                     ),
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                            onPressed: () {
-                                              showMyDialog(
-                                                  title,
-                                                  snapshot
-                                                      .child(id)
-                                                      .value
-                                                      .toString(),
-                                                  detail);
-                                            },
-                                            icon: const Icon(Icons.edit)),
-                                        IconButton(
-                                            onPressed: () {
-                                              draft
-                                                  .child(snapshot
-                                                      .child(id)
-                                                      .value
-                                                      .toString())
-                                                  .remove();
-                                            },
-                                            icon: const Icon(Icons.delete)),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Divider(
-                                    height: 4,
-                                    thickness: 2,
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: ReadMoreText(
-                                      snapshot.child('detail').value.toString(),
-                                      style:
-                                          const TextStyle(color: Colors.black),
-                                      trimLines: 3,
-                                      trimMode: TrimMode.Line,
-                                      trimCollapsedText: 'Show more',
+                                ],
+                              ),
+                            ))),
+                      );
+                    } else if (title
+                        .toLowerCase()
+                        .contains(searchController.text.toLowerCase())) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ShowSearchPost(
+                                        title: snapshot
+                                            .child('title')
+                                            .value
+                                            .toString(),
+                                        detail: snapshot
+                                            .child('detail')
+                                            .value
+                                            .toString(),
+                                      )));
+                        },
+                        child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                                child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.black12,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            snapshot
+                                                .child('title')
+                                                .value
+                                                .toString(),
+                                            style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w400),
+                                          ),
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                              onPressed: () {
+                                                showMyDialog(
+                                                    title,
+                                                    snapshot
+                                                        .child(id)
+                                                        .value
+                                                        .toString(),
+                                                    detail);
+                                              },
+                                              icon: const Icon(Icons.edit)),
+                                          IconButton(
+                                              onPressed: () {
+                                                draft
+                                                    .child(snapshot
+                                                        .child(id)
+                                                        .value
+                                                        .toString())
+                                                    .remove();
+                                              },
+                                              icon: const Icon(Icons.delete)),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Divider(
+                                      height: 4,
+                                      thickness: 2,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )));
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: ReadMoreText(
+                                        snapshot
+                                            .child('detail')
+                                            .value
+                                            .toString(),
+                                        style: const TextStyle(
+                                            color: Colors.black),
+                                        trimLines: 3,
+                                        trimMode: TrimMode.Line,
+                                        trimCollapsedText: 'Show more',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ))),
+                      );
                     } else {
                       return Container();
                     }
@@ -627,79 +676,100 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     height: 50,
                     child: Center(child: CircularProgressIndicator())),
                 itemBuilder: (context, snapshot, animation, index) {
-                  return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                          child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.black12,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      snapshot.child('title').value.toString(),
-                                      overflow: TextOverflow.fade,
-                                      style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w400),
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ShowSearchPost(
+                                    title: snapshot
+                                        .child('title')
+                                        .value
+                                        .toString(),
+                                    detail: snapshot
+                                        .child('detail')
+                                        .value
+                                        .toString(),
+                                  )));
+                    },
+                    child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                            child: Container(
+                          decoration: BoxDecoration(
+                              color: Colors.black12,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        snapshot
+                                            .child('title')
+                                            .value
+                                            .toString(),
+                                        overflow: TextOverflow.fade,
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w400),
+                                      ),
                                     ),
                                   ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        saved
+                                            .child(snapshot
+                                                .child('id')
+                                                .value
+                                                .toString())
+                                            .remove()
+                                            .then((value) {
+                                          toast().toastMessage(
+                                              'Saved Post Removed',
+                                              ColorClass().red);
+                                        });
+                                      },
+                                      child: const Image(
+                                          image: AssetImage(
+                                              'assets/images/SavedPost.png')),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Divider(
+                                  height: 4,
+                                  thickness: 2,
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      saved
-                                          .child(snapshot
-                                              .child('id')
-                                              .value
-                                              .toString())
-                                          .remove()
-                                          .then((value) {
-                                        toast().toastMessage(
-                                            'Saved Post Removed',
-                                            ColorClass().red);
-                                      });
-                                    },
-                                    child: const Image(
-                                        image: AssetImage(
-                                            'assets/images/SavedPost.png')),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: ReadMoreText(
+                                    snapshot.child('detail').value.toString(),
+                                    style: const TextStyle(color: Colors.black),
+                                    trimLines: 3,
+                                    trimMode: TrimMode.Line,
+                                    trimCollapsedText: 'Show more',
                                   ),
                                 ),
-                              ],
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Divider(
-                                height: 4,
-                                thickness: 2,
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: ReadMoreText(
-                                  snapshot.child('detail').value.toString(),
-                                  style: const TextStyle(color: Colors.black),
-                                  trimLines: 3,
-                                  trimMode: TrimMode.Line,
-                                  trimCollapsedText: 'Show more',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )));
+                            ],
+                          ),
+                        ))),
+                  );
                 },
               ),
             ),

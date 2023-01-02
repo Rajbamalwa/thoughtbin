@@ -23,12 +23,14 @@ class _PostScreenState extends State<PostScreen> {
   final userPosts =
       FirebaseDatabase.instance.ref(FirebaseAuth.instance.currentUser!.uid);
   final posts = FirebaseDatabase.instance.ref('posts');
+  var NoData = FirebaseDatabase.instance.ref('NoData');
+  var maxLength = 20;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(top: 70),
+          padding: const EdgeInsets.only(top: 40),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -68,6 +70,7 @@ class _PostScreenState extends State<PostScreen> {
                         Form(
                           key: topicKey,
                           child: TextFormField(
+                            maxLength: maxLength,
                             validator: (value) {
                               if (value!.isEmpty) {
                                 return 'Please Type Title';
@@ -186,6 +189,23 @@ class _PostScreenState extends State<PostScreen> {
                         } else {
                           return toast().toastMessage('Error', Colors.red);
                         }
+
+                        NoData.child('NoData').update({
+                          'title': titleController.text,
+                          'detail': detailController.text,
+                        }).then((value) {
+                          toast().toastMessage('Posted', Colors.blue);
+                          setState(() {
+                            loading = false;
+                            titleController.clear();
+                            detailController.clear();
+                          });
+                        }).onError((error, stackTrace) {
+                          toast().toastMessage(error.toString(), Colors.red);
+                          setState(() {
+                            loading = false;
+                          });
+                        });
                       },
                       child: Text('Post')),
                 ),
@@ -203,8 +223,7 @@ class _PostScreenState extends State<PostScreen> {
                             String id = DateTime.now()
                                 .microsecondsSinceEpoch
                                 .toString();
-
-                            userDraft.child('draft').set({
+                            userDraft.child('Drafted').update({
                               id: {
                                 'title': titleController.text,
                                 'id': id,

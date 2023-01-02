@@ -1,8 +1,9 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
+import 'package:thought_bin/Home/ShowAllPosts.dart';
 import 'package:thought_bin/utils/ReUse.dart';
-import '../Home/UploadPostScreen.dart';
+import '../Home/ShowSearchPost.dart';
 
 class RelatedPostFind extends StatefulWidget {
   const RelatedPostFind({Key? key}) : super(key: key);
@@ -16,7 +17,6 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
   var data = FirebaseDatabase.instance.ref('posts');
   var title1;
   var detail;
-  bool visible = false;
   bool isVisible = false;
   bool selected = false;
   @override
@@ -46,7 +46,7 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
                 SizedBox(height: 100),
                 Padding(
                     padding: const EdgeInsets.only(
-                        bottom: 1, top: 10, left: 15, right: 15),
+                        bottom: 1, top: 10, left: 20, right: 20),
                     child: Container(
                         color: ColorClass().white,
                         height: 55,
@@ -59,6 +59,8 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
                               suffixIcon: IconButton(
                                   onPressed: () {
                                     searchData.clear();
+                                    title1 = null;
+                                    detail = null;
                                   },
                                   icon: Icon(Icons.clear)),
                               hintText: 'e.g Fun Life',
@@ -75,9 +77,7 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
                               });
                             },
                             onChanged: (value) {
-                              setState(() {
-                                title1 = value;
-                              });
+                              setState(() {});
                             }))),
               ],
             ),
@@ -99,15 +99,12 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
                             highlightColor: ColorClass().themeColor2,
                             splashColor: ColorClass().themeColor2,
                             onTap: () {
-                              setState(() {
-                                visible = !visible;
-                              });
                               title1 = snapshot.child('title').value.toString();
                               detail =
                                   snapshot.child('detail').value.toString();
                               searchData.text =
                                   snapshot.child('title').value.toString();
-                              searchData = title1;
+                              title1 = searchData.text;
                             },
                             child: ListTile(
                               shape: RoundedRectangleBorder(
@@ -139,16 +136,13 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
                                 highlightColor: ColorClass().themeColor2,
                                 splashColor: ColorClass().themeColor2,
                                 onTap: () {
-                                  setState(() {
-                                    visible = !visible;
-                                  });
                                   title1 =
                                       snapshot.child('title').value.toString();
                                   detail =
                                       snapshot.child('detail').value.toString();
                                   searchData.text =
                                       snapshot.child('title').value.toString();
-                                  searchData.text = title1;
+                                  title1 = searchData.text;
                                 },
                                 child: ListTile(
                                   shape: RoundedRectangleBorder(
@@ -171,64 +165,54 @@ class _RelatedPostFindState extends State<RelatedPostFind> {
                       }
                     })),
           ),
-          Visibility(
-            visible: visible,
-            replacement: Padding(
-              padding: const EdgeInsets.all(8.0),
+          Container(
+            color: ColorClass().white,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
               child: Buttons(
-                onPress: () {
-                  toast().toastMessage(
-                      'Please type a topic and select it!', ColorClass().red);
-                },
-                boxDecoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: ColorClass().black12,
-                ),
-                height: 50,
-                child: Text('Please Select topic to Enable button'),
-              ),
-            ),
-            child: Container(
-              color: ColorClass().white,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 50, left: 20, right: 20),
-                child: Buttons(
-                    onPress: () async {
-                      if (title1 == null) {
-                        searchData.clear();
-                        toast().toastMessage(
-                            'Please type a topic and select it',
-                            ColorClass().red);
-                      } else if (title1 != null) {
-                        searchData.clear();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => UploadPostScreen(
-                                      title: title1,
-                                      detail: detail,
-                                    )));
-                      } else {
-                        toast().toastMessage(
-                            'Please type full word and then select it',
-                            ColorClass().red);
-                      }
-                    },
-                    child: Text(
-                      'Find Related Posts',
-                      style: TextStyle(color: ColorClass().white, fontSize: 21),
-                    ),
-                    height: 55,
-                    boxDecoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            colors: [
-                              ColorClass().themeColor2,
-                              ColorClass().themeColor
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter),
-                        borderRadius: BorderRadius.circular(10))),
-              ),
+                  onPress: () async {
+                    if (title1 == null) {
+                      Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ShowAllPost()))
+                          .onError((error, stackTrace) {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => NoData1()));
+                      });
+                    } else if (title1 != null) {
+                      searchData.clear();
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ShowSearchPost(
+                                    title: title1,
+                                    detail: detail,
+                                  ))).whenComplete(() {
+                        title1 = null;
+                      }).onError((error, stackTrace) {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => NoData1()));
+                      });
+                    } else {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => NoData1()));
+                    }
+                  },
+                  child: Text(
+                    'Find Related Posts',
+                    style: TextStyle(color: ColorClass().white, fontSize: 21),
+                  ),
+                  height: 55,
+                  boxDecoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          colors: [
+                            ColorClass().themeColor2,
+                            ColorClass().themeColor
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter),
+                      borderRadius: BorderRadius.circular(10))),
             ),
           ),
         ],

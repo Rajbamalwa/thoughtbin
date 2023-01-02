@@ -48,7 +48,7 @@ class _BreathInOutState extends State<BreathInOut> {
                               builder: (context) => IntroScreenWidgets()));
                     } else {
                       toast().toastMessage(
-                          'Welcome Back, Please type a topic and select it',
+                          'Welcome Back ${FirebaseAuth.instance.currentUser!.email.toString()}, Please type a topic and select it',
                           ColorClass().blue);
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) => HomePage()));
